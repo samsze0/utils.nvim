@@ -1,5 +1,8 @@
 local M = {}
 
+M.setup = function()
+end
+
 ---@generic T : any
 ---@generic U : any
 ---@param tbl table<any, T> | T[]
@@ -152,7 +155,7 @@ end
 M.safe_require = function(module_name, on_error)
   on_error = on_error
     or function(err)
-      vim.error("Failed to load module:", module_name, "Err:", err)
+      print("Failed to load module:", module_name, "Err:", err)
     end
   local ok, module = xpcall(require, on_error, module_name)
   if not ok then
