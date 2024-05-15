@@ -1,6 +1,8 @@
 local M = {}
 
-M.setup = function()
+---@alias UtilsOptions {}
+---@param opts? UtilsOptions
+M.setup = function(opts)
 end
 
 ---@generic T : any
