@@ -608,17 +608,16 @@ end
 -- vim.system wrapper
 --
 ---@param cmd string
----@param opts? { error_msg_title?: string, input?: any, on_error?: fun(err: string): nil }
+---@param opts? { input?: any, on_error?: fun(exit_status: number, err: string): nil }
 ---@return string
 M.system = function(cmd, opts)
   opts = M.opts_extend({
-    error_msg_title = "Failed to execute command " .. cmd,
   }, opts)
 
   local result = vim.fn.system(cmd, opts.input)
   if vim.v.shell_error ~= 0 then
-    if opts.on_error then opts.on_error(result) end
-    error(M.str_fmt(opts.error_msg_title, result))
+    if opts.on_error then opts.on_error(vim.v.shell_error, result) end
+    error(("Exit with status %d when executing command %s\n%s"):format(exit_status, cmd, result))
   end
 
   return result
@@ -627,14 +626,14 @@ end
 -- vim.system wrapper
 --
 ---@param cmd string
----@param opts? { input?: any, on_error?: fun(err: string): nil }
+---@param opts? { input?: any, on_error?: fun(exit_status: number, err: string): nil }
 ---@return string?
 M.system_safe = function(cmd, opts)
   opts = opts or {}
 
   local result = vim.fn.system(cmd, opts.input)
   if vim.v.shell_error ~= 0 then
-    if opts.on_error then opts.on_error(result) end
+    if opts.on_error then opts.on_error(vim.v.shell_error, result) end
     return nil
   end
 
@@ -643,13 +642,13 @@ end
 
 -- vim.systemlist wrapper
 --
----@alias UtilsSystemlistOptions { trim?: boolean, error_msg_title?: string, input?: any, keepempty?: boolean, on_error?: fun(err: string): nil }
+---@alias UtilsSystemlistOptions { trim?: boolean, input?: any, keepempty?: boolean, on_error?: fun(exit_status: number, err: string): nil }
 ---@param cmd string
 ---@param opts? UtilsSystemlistOptions
 ---@return string[]
 M.systemlist = function(cmd, opts)
   opts = M.opts_extend(
-    { error_msg_title = "Failed to execute command " .. cmd },
+    {},
     opts
   )
   ---@cast opts UtilsSystemlistOptions
@@ -657,8 +656,8 @@ M.systemlist = function(cmd, opts)
   local result = vim.fn.systemlist(cmd, opts.input, opts.keepempty)
   if vim.v.shell_error ~= 0 then
     local err_msg = table.concat(result, "\n")
-    if opts.on_error then opts.on_error(err_msg) end
-    error(M.str_fmt(opts.error_msg_title, err_msg))
+    if opts.on_error then opts.on_error(vim.v.shell_error, err_msg) end
+    error(("Exit with status %d when executing command %s\n%s"):format(exit_status, cmd, result))
   end
 
   if opts.trim then
@@ -676,7 +675,7 @@ end
 -- vim.systemlist wrapper
 --
 ---@param cmd string
----@param opts? { input?: any, keepempty?: boolean, on_error?: fun(err: string): nil }
+---@param opts? { input?: any, keepempty?: boolean, on_error?: fun(exit_status: string, err: string): nil }
 ---@return string[]?
 M.systemlist_safe = function(cmd, opts)
   opts = opts or {}
@@ -684,7 +683,7 @@ M.systemlist_safe = function(cmd, opts)
   local result = vim.fn.systemlist(cmd, opts.input, opts.keepempty)
   if vim.v.shell_error ~= 0 then
     local err_msg = table.concat(result, "\n")
-    if opts.on_error then opts.on_error(err_msg) end
+    if opts.on_error then opts.on_error(vim.v.shell_error, err_msg) end
     return nil
   end
 
