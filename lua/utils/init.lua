@@ -5,6 +5,15 @@ local M = {}
 M.setup = function(opts)
 end
 
+-- Return the full path to the currently executing lua script
+-- Note that this function is not callable. Please just copy and paste the definition into where you need it.
+--
+---@return string
+M.current_lua_script_path = function()
+  error("Not callable")
+  return debug.getinfo(1).source:match("@?(.*/)")
+end
+
 ---@generic T : any
 ---@generic U : any
 ---@param tbl table<any, T> | T[]
