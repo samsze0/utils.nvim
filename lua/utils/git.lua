@@ -1,4 +1,6 @@
-local utils = require("utils")
+local opts_utils = require("utils.opts")
+local tbl_utils = require("utils.table")
+local terminal_utils = require("utils.terminal")
 
 local M = {}
 
@@ -28,25 +30,25 @@ end
 M.files = function(git_dir, opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
 
-  opts = utils.opts_extend({
+  opts = opts_utils.extend({
     filter_unreadable = false, -- Whether or not remove unreadable files
   }, opts)
   ---@cast opts GitUtilsFilesOptions
 
-  local files = utils.systemlist(M.files_cmd(git_dir), {
+  local files, status, err = terminal_utils.systemlist(M.files_cmd(git_dir), {
     keepempty = false,
   })
-  ---@cast files string[]
+  assert(status == 0, err)
 
   if opts.filter_unreadable then
-    files = utils.filter(
+    files = tbl_utils.filter(
       files,
       function(i, e) return vim.fn.filereadable(git_dir .. "/" .. e) == 1 end
     )
   end
 
   -- Filter out empty lines
-  return utils.filter(files, function(i, e) return vim.trim(e):len() > 0 end)
+  return tbl_utils.filter(files, function(i, e) return vim.trim(e):len() > 0 end)
 end
 
 -- Return the shell command for retrieving current git directory
@@ -57,11 +59,11 @@ M.current_dir_cmd = function() return [[git rev-parse --show-toplevel]] end
 M.current_dir = function(opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
 
-  opts = utils.opts_extend({}, opts)
+  opts = opts_utils.extend({}, opts)
 
-  local path = vim.trim(vim.fn.system(M.current_dir_cmd()))
-  if vim.v.shell_error ~= 0 then return nil end
-  return path
+  local path, status, err = terminal_utils.system(M.current_dir_cmd())
+  if status ~= 0 then return nil end
+  return vim.trim(path)
 end
 
 ---@param filepath string
@@ -70,9 +72,9 @@ end
 M.convert_filepath_to_gitpath = function(filepath, opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
 
-  opts = vim.tbl_extend("force", {
+  opts = opts_utils.extend({
     git_dir = M.current_dir(),
-  }, opts or {})
+  }, opts)
 
   filepath = vim.fn.fnamemodify(filepath, ":p")
   local git_dir = vim.fn.fnamemodify(opts.git_dir, ":p")

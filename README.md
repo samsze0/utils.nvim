@@ -1,6 +1,8 @@
 # utils.nvim
 
-Common utils for my neovim plugins
+An unopinionated set of utility functions for neovim plugins
+
+The library/plugin would not include anything that I feel like there is a better alternative for. For example, I would not include utilities for creating/managing neovim windows, as plugins like nui.nvim have taken great care of that.
 
 ## Usage
 
@@ -8,7 +10,12 @@ Common utils for my neovim plugins
 
 ```lua
 {
-    "samsze0/utils.nvim"
+    "samsze0/utils.nvim",
+    dependencies = {
+        "nvim-neotest/nvim-nio",
+        "pysan3/pathlib.nvim",
+        "echasnovski/mini.test"
+    }
 }
 ```
 

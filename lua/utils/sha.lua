@@ -38,6 +38,7 @@ end
 
 local M = {}
 
+---@param bytes number[]
 function M.sha1(bytes)
   local len = {}
   local bytes_len = #bytes * 8

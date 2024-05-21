@@ -11,7 +11,7 @@ local M = {}
 ---@alias GetDodckerImagesOptions { all?: boolean }
 ---@param opts? GetDodckerImagesOptions
 ---@return DockerImage[]
-function M.docker_images(opts)
+function M.images(opts)
   if vim.fn.executable("docker") ~= 1 then
     error("Docker executable not found")
   end
@@ -39,7 +39,7 @@ end
 ---@alias GetDodckerContainersOptions { all?: boolean }
 ---@param opts? GetDodckerContainersOptions
 ---@return DockerContainer[]
-function M.docker_containers(opts)
+function M.containers(opts)
   if vim.fn.executable("docker") ~= 1 then
     error("Docker executable not found")
   end

@@ -6,10 +6,10 @@ local M = {}
 
 ---@param tab_nr number
 ---@return VimTab
-function M.gettabinfo(tab_nr) return vim.fn.gettabinfo(tab_nr or 0) end
+function M.get_tab_info(tab_nr) return vim.fn.gettabinfo(tab_nr or 0) end
 
 ---@return VimTab[]
-function M.gettabsinfo()
+function M.get_tabs_info()
   return utils.map(vim.fn.gettabinfo(), function(_, tab) return tab end)
 end
 

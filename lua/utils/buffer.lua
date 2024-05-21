@@ -1,4 +1,4 @@
-local utils = require("utils")
+local tbl_utils = require("utils.table")
 
 local M = {}
 
@@ -6,8 +6,8 @@ local M = {}
 
 ---@param opts? { buflisted?: boolean, bufloaded?: boolean, bufmodified?: boolean }
 ---@return VimBuffer[]
-function M.getbufsinfo(opts)
-  return utils.map(vim.fn.getbufinfo(opts or {}), function(_, buf)
+function M.get_bufs_info(opts)
+  return tbl_utils.map(vim.fn.getbufinfo(opts or {}), function(_, buf)
     buf.changed = buf.changed == 1
     buf.hidden = buf.hidden == 1
     buf.listed = buf.listed == 1
