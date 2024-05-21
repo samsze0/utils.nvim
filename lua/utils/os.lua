@@ -4,8 +4,6 @@ M.OS = vim.loop.os_uname().sysname
 M.IS_MAC = M.OS == "Darwin"
 M.IS_LINUX = M.OS == "Linux"
 
--- TODO: extract the heredoc part into a helper method
-
 -- Return the shell command to send data to a named pipe
 --
 ---@param name string
@@ -13,11 +11,19 @@ M.IS_LINUX = M.OS == "Linux"
 ---@return string
 M.write_to_named_pipe_cmd = function(name, data)
   if M.IS_MAC then
+    if vim.fn.executable("nc") ~= 1 then
+      error("nc command not found")
+    end
+
     return ([[cat <<EOF | nc -U %s
 %s
 EOF
 ]]):format(name, data)
   elseif M.IS_LINUX then
+    if vim.fn.executable("socat") ~= 1 then
+      error("socat command not found")
+    end
+
     return ([[cat <<EOF | socat - UNIX-CONNECT:%s
 %s
 EOF
@@ -48,6 +54,10 @@ end
 ---@param data string
 ---@return string
 M.write_to_tcp_cmd = function(host, port, data)
+  if vim.fn.executable("nc") ~= 1 then
+    error("nc command not found")
+  end
+
   if M.IS_MAC then
     return ([[cat <<EOF | nc %s %s
 %s
@@ -58,28 +68,6 @@ EOF
   else
     error("Unsupported OS")
   end
-end
-
--- Return next available port
---
----@param start number
----@param opts? { max?: number, step?: number }
----@return number
-M.next_available_port = function(start, opts)
-  opts = vim.tbl_extend("force", { max = 30, step = 10 }, opts or {})
-
-  local port = start
-  port = port - opts.step
-  opts.max = opts.max + 1
-  repeat
-    port = port + opts.step
-    opts.max = opts.max - 1
-    vim.fn.system(([[netstat -taln | grep %s]]):format(port))
-  until vim.v.shell_error ~= 0 or opts.max <= 0
-
-  if opts.max <= 0 then error("No available port") end
-
-  return port
 end
 
 return M
