@@ -1,5 +1,4 @@
 local utils = require("utils")
-local json_utils = require("utils.json")
 
 local M = {}
 
@@ -29,7 +28,7 @@ function M.docker_images(opts)
   local result =
     utils.system("docker image ls " .. utils.shell_opts_tostring(opts))
   result = vim.trim(result)
-  local images = json_utils.parse_multiple(result)
+  local images = vim.json.decode(result)
   ---@cast images DockerImage[]
 
   return images
@@ -57,7 +56,7 @@ function M.docker_containers(opts)
   local result =
     utils.system("docker container ls " .. utils.shell_opts_tostring(opts))
   result = vim.trim(result)
-  local containers = json_utils.parse_multiple(result)
+  local containers = vim.json.decode(result)
   ---@cast containers DockerContainer[]
 
   return containers
