@@ -2,18 +2,28 @@ local MiniTest = require("mini.test")
 
 local expect, eq = MiniTest.expect, MiniTest.expect.equality
 
-local test_set = MiniTest.new_set({})
+local child = MiniTest.new_child_neovim()
 
-test_set["base64 encode"] = function()
-	local base64_utils = require("utils.base64")
-	local encoded = base64_utils.encode("Hello, World!")
+local T = MiniTest.new_set({
+	hooks = {
+		pre_case = function()
+			child.restart({ "-c", "set rtp+=." })
+			child.lua("M = require('utils.base64')")
+		end,
+		post_once = function()
+			child.stop()
+		end,
+	},
+})
+
+T["base64 encode"] = function()
+	local encoded = child.lua_get([[M.encode("Hello, World!")]])
 	eq(encoded, "SGVsbG8sIFdvcmxkIQ==")
 end
 
-test_set["base64 decode"] = function()
-	local base64_utils = require("utils.base64")
-	local decoded = base64_utils.decode("SGVsbG8sIFdvcmxkIQ==")
+T["base64 decode"] = function()
+	local decoded = child.lua_get([[M.decode("SGVsbG8sIFdvcmxkIQ==")]])
 	eq(decoded, "Hello, World!")
 end
 
-return test_set
+return T
