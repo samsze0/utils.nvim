@@ -24,6 +24,8 @@ M.pad = function(str, length)
 	return string.format("%-" .. length .. "s", str)
 end
 
+local nbsp = "\xe2\x80\x82" -- "\u{2002}"
+
 -- Split a string into parts
 --
 ---@alias StringSplitOpts { count?: number, sep?: string, include_remaining?: boolean, discard_empty?: boolean, trim?: boolean, plain?: boolean }
@@ -44,8 +46,8 @@ M.split = function(str, opts)
 	-- We perform split by first replacing all occurrences of sep with nbsp,
 	-- then we `vim.split` by nbsp
 
-	str = str:gsub(opts.sep, M.nbsp, opts.count)
-	result = vim.split(str, M.nbsp, { trimempty = opts.discard_empty, plain = opts.plain })
+	str = str:gsub(opts.sep, nbsp, opts.count)
+	result = vim.split(str, nbsp, { trimempty = opts.discard_empty, plain = opts.plain })
 	if opts.count ~= nil and #result ~= opts.count + 1 then
 		error(M.fmt("Expected", opts.count + 1, "parts, but got", result))
 	end
