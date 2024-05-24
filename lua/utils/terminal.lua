@@ -107,9 +107,7 @@ M.system = function(cmd, opts)
   opts = opts or {}
 
   local result = vim.fn.system(cmd, opts.input)
-  if vim.v.shell_error ~= 0 then
-    return nil, vim.v.shell_error, result
-  end
+  if vim.v.shell_error ~= 0 then return nil, vim.v.shell_error, result end
 
   return result, vim.v.shell_error, nil
 end
@@ -167,3 +165,4 @@ M.systemlist_unsafe = function(cmd, opts)
 end
 
 return M
+

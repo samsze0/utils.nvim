@@ -38,7 +38,7 @@ M.files = function(git_dir, opts)
   local files, status, err = terminal_utils.systemlist(M.files_cmd(git_dir), {
     keepempty = false,
   })
-  assert(status == 0, err)
+  assert(files and status == 0, err)
 
   if opts.filter_unreadable then
     files = tbl_utils.filter(
@@ -48,7 +48,10 @@ M.files = function(git_dir, opts)
   end
 
   -- Filter out empty lines
-  return tbl_utils.filter(files, function(i, e) return vim.trim(e):len() > 0 end)
+  return tbl_utils.filter(
+    files,
+    function(i, e) return vim.trim(e):len() > 0 end
+  )
 end
 
 -- Return the shell command for retrieving current git directory
@@ -62,7 +65,7 @@ M.current_dir = function(opts)
   opts = opts_utils.extend({}, opts)
 
   local path, status, err = terminal_utils.system(M.current_dir_cmd())
-  if status ~= 0 then return nil end
+  if not path then return nil end
   return vim.trim(path)
 end
 
@@ -77,6 +80,7 @@ M.convert_filepath_to_gitpath = function(filepath, opts)
   }, opts)
 
   filepath = vim.fn.fnamemodify(filepath, ":p")
+  if not filepath then error("Invalid filepath") end
   local git_dir = vim.fn.fnamemodify(opts.git_dir, ":p")
 
   if filepath:sub(1, #git_dir) ~= git_dir then
@@ -89,6 +93,7 @@ M.convert_filepath_to_gitpath = function(filepath, opts)
   end
 
   local path = vim.fn.fnamemodify(filepath, ":~" .. git_dir .. ":.")
+  if not path then error("Invalid filepath") end
   path = path:match("/(.*)")
   if not path then -- If filepath happens to be the git_dir
     path = ""

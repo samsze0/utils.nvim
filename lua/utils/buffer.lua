@@ -7,11 +7,14 @@ local M = {}
 ---@param opts? { buflisted?: boolean, bufloaded?: boolean, bufmodified?: boolean }
 ---@return VimBuffer[]
 function M.get_bufs_info(opts)
-  return tbl_utils.map(vim.fn.getbufinfo(opts or {}), function(_, buf)
-    buf.changed = buf.changed == 1
-    buf.hidden = buf.hidden == 1
-    buf.listed = buf.listed == 1
-    buf.loaded = buf.loaded == 1
+  local bufs_info = vim.fn.getbufinfo(opts or {})
+  if not bufs_info then return {} end
+
+  return tbl_utils.map(bufs_info, function(_, buf)
+    buf.changed = buf.changed == 1 ---@diagnostic disable-line assign-type-mismatch
+    buf.hidden = buf.hidden == 1 ---@diagnostic disable-line assign-type-mismatch
+    buf.listed = buf.listed == 1 ---@diagnostic disable-line assign-type-mismatch
+    buf.loaded = buf.loaded == 1 ---@diagnostic disable-line assign-type-mismatch
     return buf
   end)
 end

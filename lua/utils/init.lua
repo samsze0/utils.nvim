@@ -10,8 +10,8 @@ M.setup = function(opts) end
 ---@deprecated
 ---@return string
 M.current_lua_script_path = function()
-	error("Not callable")
-	return debug.getinfo(1).source:match("@?(.*/)")
+  error("Not callable")
+  return debug.getinfo(1).source:match("@?(.*/)")
 end
 
 -- Print and return value
@@ -20,8 +20,8 @@ end
 ---@param x T
 ---@return T
 M.debug = function(x)
-	print(vim.inspect(x))
-	return x
+  print(vim.inspect(x))
+  return x
 end
 
 return M

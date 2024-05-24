@@ -3,27 +3,25 @@ local editor_utils = require("utils.editor")
 
 -- Check if test-file.js exists
 local f = io.open("tests/test-file.js", "r")
-if f == nil then
-	error("tests/test-file.js does not exist")
-end
+if f == nil then error("tests/test-file.js does not exist") end
 
 -- Open test-file.js
 vim.cmd("edit tests/test-file.js")
 
 -- Double check if test file has the expected content
 assert(vim.deep_equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
-	"// 'hypot' is a binary function",
-	"const hypot = (x, y) => Math.sqrt(x * x + y * y);",
-	"",
-	"// 'thunk' is a function that takes no arguments and, when invoked, performs a potentially expensive",
-	"// operation (computing a square root, in this example) and/or causes some side-effect to occur",
-	"const thunk = () => hypot(3, 4);",
-	"",
-	"// the thunk can then be passed around without being evaluated...",
-	"doSomethingWithThunk(thunk);",
-	"",
-	"// ...or evaluated",
-	"thunk(); // === 5",
+  "// 'hypot' is a binary function",
+  "const hypot = (x, y) => Math.sqrt(x * x + y * y);",
+  "",
+  "// 'thunk' is a function that takes no arguments and, when invoked, performs a potentially expensive",
+  "// operation (computing a square root, in this example) and/or causes some side-effect to occur",
+  "const thunk = () => hypot(3, 4);",
+  "",
+  "// the thunk can then be passed around without being evaluated...",
+  "doSomethingWithThunk(thunk);",
+  "",
+  "// ...or evaluated",
+  "thunk(); // === 5",
 }))
 
 assert(not editor_utils.get_mode().blocking)
@@ -52,16 +50,11 @@ assert(not editor_utils.get_mode().blocking)
 assert(editor_utils.get_mode().mode == "v")
 
 local selection = editor_utils.get_visual_selection()
-assert(
-	vim.deep_equal(
-		selection,
-		{
-			"// 'hypot' is a binary function",
-			"const hypot = (x, y) => Math.sqrt(x * x + y * y);",
-			"",
-			"// 'thunk' is a function that takes no arguments and, when invoked, performs a potentially expensive",
-			"// operation (computing a square",
-		}
-	)
-)
+assert(vim.deep_equal(selection, {
+  "// 'hypot' is a binary function",
+  "const hypot = (x, y) => Math.sqrt(x * x + y * y);",
+  "",
+  "// 'thunk' is a function that takes no arguments and, when invoked, performs a potentially expensive",
+  "// operation (computing a square",
+}))
 

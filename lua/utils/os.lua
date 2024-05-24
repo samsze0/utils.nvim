@@ -11,18 +11,14 @@ M.IS_LINUX = M.OS == "Linux"
 ---@return string
 M.write_to_named_pipe_cmd = function(name, data)
   if M.IS_MAC then
-    if vim.fn.executable("nc") ~= 1 then
-      error("nc command not found")
-    end
+    if vim.fn.executable("nc") ~= 1 then error("nc command not found") end
 
     return ([[cat <<EOF | nc -U %s
 %s
 EOF
 ]]):format(name, data)
   elseif M.IS_LINUX then
-    if vim.fn.executable("socat") ~= 1 then
-      error("socat command not found")
-    end
+    if vim.fn.executable("socat") ~= 1 then error("socat command not found") end
 
     return ([[cat <<EOF | socat - UNIX-CONNECT:%s
 %s
@@ -54,9 +50,7 @@ end
 ---@param data string
 ---@return string
 M.write_to_tcp_cmd = function(host, port, data)
-  if vim.fn.executable("nc") ~= 1 then
-    error("nc command not found")
-  end
+  if vim.fn.executable("nc") ~= 1 then error("nc command not found") end
 
   if M.IS_MAC then
     return ([[cat <<EOF | nc %s %s
