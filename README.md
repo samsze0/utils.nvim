@@ -2,7 +2,9 @@
 
 An unopinionated set of utility functions for neovim plugins
 
-The library/plugin would not include anything that I feel like there is a better alternative for. For example, I would not include utilities for creating/managing neovim windows, as plugins like nui.nvim have taken great care of that.
+The goal of this plugin is to not "re-invent the wheel" and to work with existing neovim libraries/plugins to provide a more complete set of utility functions.
+
+A sub-goal of this library is to provide an intuitive wrapper interface over the neovim API. All utilities in this plugin are typed by the [lua-language-server's standard](https://github.com/LuaLS/lua-language-server/wiki/Annotations).
 
 ## Usage
 
@@ -10,12 +12,11 @@ The library/plugin would not include anything that I feel like there is a better
 
 ```lua
 {
-    "samsze0/utils.nvim",
-    dependencies = {
-        "nvim-neotest/nvim-nio",
-        "pysan3/pathlib.nvim",
-        "echasnovski/mini.test"
-    }
+  "samsze0/utils.nvim",
+  dependencies = {
+    "nvim-neotest/nvim-nio",
+    "pysan3/pathlib.nvim"
+  }
 }
 ```
 
