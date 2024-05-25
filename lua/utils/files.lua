@@ -1,30 +1,38 @@
 local tbl_utils = require("utils.table")
-local str_utils = require("utils.string")
+local Path = require("pathlib")
 
 local M = {}
 
--- Sort a list of files by a special order by which lower nested files come first. If
--- the nested level is the same, then sort by alphabetical order (case insensitive).
+-- Sort a list of files by a special order by which files at lower depth comes first. If
+-- the depth is the same, then sort by alphabetical order (case insensitive).
 --
----@param paths string[]
----@param transformer? fun(path: string): string
----@return string[]
-M.sort = function(paths, transformer)
-  if not transformer then transformer = function(path) return path end end
-
+---@param paths PathlibPath[]
+---@return PathlibPath[]
+M.sort = function(paths)
   return tbl_utils.sort(paths, function(a, b)
-    a = transformer(a)
-    b = transformer(b)
+    local a_depth = a:depth()
+    local b_depth = b:depth()
 
-    local a_level = str_utils.count(a, "/")
-    local b_level = str_utils.count(b, "/")
+    if a_depth == b_depth then
+      if a:is_dir() and not b:is_dir() then
+        return true
+      elseif not a:is_dir() and b:is_dir() then
+        return false
+      end
 
-    if a_level == b_level then
       return a:lower() < b:lower()
     else
-      return a_level < b_level
+      return a_depth < b_depth
     end
   end)
+end
+
+-- Convert a list of path strings to a list of Path objects
+--
+---@param paths string[]
+---@return PathlibPath[]
+M.from_strs = function(paths)
+  return tbl_utils.map(paths, function(_, p) return Path.new(p) end)
 end
 
 return M
