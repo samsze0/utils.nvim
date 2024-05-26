@@ -13,10 +13,7 @@ M.map = function(tbl, func, opts)
   }, opts or {})
 
   local new_tbl = {}
-  if
-    (opts.is_array ~= nil and opts.is_array)
-    or (opts.is_array == nil and M.is_array(tbl))
-  then
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
       local result = func(i, v)
       if opts.skip_nil and result == nil then
@@ -78,10 +75,7 @@ M.reduce = function(tbl, fn, init, opts)
   }, opts or {})
 
   local acc = init
-  if
-    (opts.is_array ~= nil and opts.is_array)
-    or (opts.is_array == nil and M.is_array(tbl))
-  then
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
       acc = fn(acc, i, v)
     end
@@ -131,10 +125,7 @@ M.filter = function(tbl, fn, opts)
   }, opts or {})
 
   local result = {}
-  if
-    (opts.is_array ~= nil and opts.is_array)
-    or (opts.is_array == nil and M.is_array(tbl))
-  then
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
       if fn(i, v) then table.insert(result, v) end
     end
@@ -193,10 +184,7 @@ M.find = function(tbl, fn, opts)
     is_array = nil, -- If nil, auto-detect if tbl is array
   }, opts or {})
 
-  if
-    (opts.is_array ~= nil and opts.is_array)
-    or (opts.is_array == nil and M.is_array(tbl))
-  then
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
       if fn(i, v) then return i, v end
     end
@@ -231,10 +219,7 @@ M.max = function(tbl, accessor, opts)
   }, opts or {})
 
   local max = nil
-  if
-    (opts.is_array ~= nil and opts.is_array)
-    or (opts.is_array == nil and M.is_array(tbl))
-  then
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
       local value = accessor(i, v)
       if max == nil or value > max then max = value end
@@ -267,10 +252,7 @@ M.sort = function(tbl, compare_fn, opts)
 
   local keys = M.keys(tbl)
   table.sort(keys, function(a, b) return compare_fn(tbl[a], tbl[b]) end)
-  if
-    (opts.is_array ~= nil and opts.is_array)
-    or (opts.is_array == nil and M.is_array(tbl))
-  then
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     local sorted = {}
     for _, k in ipairs(keys) do
       table.insert(sorted, tbl[k])
@@ -315,6 +297,30 @@ M.list_extend = function(...)
     end
   end
   return result
+end
+
+-- Check if any element in the table satisfies the condition
+--
+---@generic T : any
+---@param tbl table<any, T>
+---@param fn fun(k: any, v: T): boolean
+---@param opts? { is_array?: boolean }
+M.any = function(tbl, fn, opts)
+  opts = vim.tbl_extend("force", {
+    is_array = nil, -- If nil, auto-detect if tbl is array
+  }, opts or {})
+
+  if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
+    for i, v in ipairs(tbl) do
+      if fn(i, v) then return true end
+    end
+  else
+    for k, v in pairs(tbl) do
+      if fn(k, v) then return true end
+    end
+  end
+
+  return false
 end
 
 ---@param target table
@@ -388,4 +394,3 @@ M.tbl_deep_extend = function(opts, ...)
 end
 
 return M
-
