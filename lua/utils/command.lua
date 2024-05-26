@@ -1,3 +1,5 @@
+local tbl_utils = require("utils.table")
+
 local M = {}
 
 ---@param name string
@@ -11,6 +13,17 @@ function M.create(name, command, opts)
     desc = opts.description,
     force = opts.force,
   })
+end
+
+---@alias VimCommand { name: string }
+---@param opts? { }
+function M.list(opts)
+  local commands = vim.api.nvim_get_commands({ builtin = false })
+  return tbl_utils.map(commands, function (name, cmd)
+    return {
+      name = name,
+    }
+  end)
 end
 
 return M

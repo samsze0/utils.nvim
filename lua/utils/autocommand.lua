@@ -1,4 +1,5 @@
 local tbl_utils = require("utils.table")
+local opts_utils = require("utils.opts")
 
 local M = {}
 
@@ -273,6 +274,7 @@ function M.create(opts)
   end
 
   return vim.api.nvim_create_autocmd(opts.events, {
+    group = opts.group,
     pattern = opts.pattern,
     desc = opts.description,
     callback = opts.lua_callback,
@@ -287,15 +289,19 @@ end
 ---@param opts? { clear?: boolean }
 ---@return number group_id
 function M.create_group(name, opts)
-  opts = opts or {}
+  opts = opts_utils.extend({ clear = false }, opts)
 
-  return vim.api.nvim_create_augroup(name)
+  return vim.api.nvim_create_augroup(name, opts)
 end
 
 ---@param opts { group?: number | string, events?: AutocmdEvent[] | AutocmdEvent, pattern?: string, buffer?: number }
 ---@return Autocmd[] autocmds
 function M.get(opts)
   opts = opts or {}
+
+  if opts.pattern ~= nil and opts.buffer ~= nil then
+    error("Cannot specify both pattern and buffer option")
+  end
 
   local autocmds = vim.api.nvim_get_autocmds({
     group = opts.group,
