@@ -1,5 +1,12 @@
 local M = {}
 
+---@type SemanticVersion
+M.version = {
+  major = 0,
+  minor = 1,
+  patch = 0,
+}
+
 ---@alias UtilsOptions {}
 ---@param opts? UtilsOptions
 M.setup = function(opts) end
