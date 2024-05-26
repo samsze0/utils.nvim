@@ -99,15 +99,21 @@ M.nbsp = "\xe2\x80\x82" -- "\u{2002}"
 -- vim.fn.system wrapper
 -- Run a shell command and return the output as a string
 --
----@alias TerminalSystemOptions { input?: any }
+---@alias TerminalSystemOptions { input?: any, trim_endline?: boolean }
 ---@param cmd string
 ---@param opts? TerminalSystemOptions
 ---@return string? result, number exit_status, string? err
 M.system = function(cmd, opts)
-  opts = opts or {}
+  opts = opts_utils.extend({
+    trim_endline = false,
+  }, opts)
 
   local result = vim.fn.system(cmd, opts.input)
   if vim.v.shell_error ~= 0 then return nil, vim.v.shell_error, result end
+
+  if opts.trim_endline and result:match("\n$") then
+    result = result:sub(1, -2)
+  end
 
   return result, vim.v.shell_error, nil
 end
@@ -127,12 +133,16 @@ end
 -- vim.fn.systemlist wrapper
 -- Run a shell command and return the output as a list of strings
 --
----@alias TerminalSystemlistOptions { trim?: boolean, input?: any, keepempty?: boolean }
+---@alias TerminalSystemlistOptions { trim?: boolean, input?: any, keepempty?: boolean, trim_endline?: boolean }
 ---@param cmd string
 ---@param opts? TerminalSystemlistOptions
 ---@return string[]? result, number exit_status, string? err
 M.systemlist = function(cmd, opts)
-  opts = opts or {}
+  opts = opts_utils.extend({
+    trim = false,
+    keepempty = true,
+    trim_endline = false,
+  }, opts)
 
   local result = vim.fn.systemlist(cmd, opts.input, opts.keepempty)
   if vim.v.shell_error ~= 0 then
@@ -140,12 +150,20 @@ M.systemlist = function(cmd, opts)
     return nil, vim.v.shell_error, err_msg
   end
 
+  if
+    opts.trim_endline
+    and type(result[#result]) == "string"
+    and result[#result] == "\n"
+  then
+    result[#result] = nil
+  end
+
   if opts.trim then
     for i, v in ipairs(result) do
       result[i] = vim.trim(v)
     end
     if not opts.keepempty then
-      result = M.filter(result, function(_, v) return v ~= "" end)
+      result = tbl_utils.filter(result, function(_, v) return v ~= "" end)
     end
   end
 
@@ -165,4 +183,3 @@ M.systemlist_unsafe = function(cmd, opts)
 end
 
 return M
-
