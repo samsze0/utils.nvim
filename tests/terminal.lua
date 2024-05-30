@@ -44,13 +44,12 @@ assert(err == "Hello, World!\n")
 local output = terminal_utils.system_unsafe("echo 'Hello, World!'")
 assert(output == "Hello, World!\n")
 
-local ok, err, output = pcall(
+local ok, output = pcall(
   function()
     return terminal_utils.system_unsafe("echo 'Hello, World!' && exit 1")
   end
 )
 assert(not ok)
-assert(output == nil)
 
 local output, exit_status, err =
   terminal_utils.systemlist("echo -n ' 1 \n 2 \n \n 3 '", {
@@ -85,7 +84,7 @@ local output = terminal_utils.systemlist_unsafe("echo -n ' 1 \n 2 \n \n 3 '", {
 })
 assert(vim.deep_equal(output, { "1", "2", "3" }))
 
-local ok, err, output = pcall(
+local ok, output = pcall(
   function()
     return terminal_utils.systemlist_unsafe(
       "echo -n ' 1 \n 2 \n \n 3 ' && exit 1",
@@ -97,4 +96,3 @@ local ok, err, output = pcall(
   end
 )
 assert(not ok)
-assert(output == nil)

@@ -4,11 +4,10 @@ local M = {}
 ---@generic U : any
 ---@param tbl table<any, T> | T[]
 ---@param func fun(k: any, v: T): U
----@param opts? { skip_nil?: boolean, is_array?: boolean | nil }
+---@param opts? { is_array?: boolean | nil }
 ---@return U[]
 M.map = function(tbl, func, opts)
   opts = vim.tbl_extend("force", {
-    skip_nil = true,
     is_array = nil, -- If nil, auto-detect if tbl is array
   }, opts or {})
 
@@ -16,21 +15,13 @@ M.map = function(tbl, func, opts)
   if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
       local result = func(i, v)
-      if opts.skip_nil and result == nil then
-        -- Skip
-      else
-        table.insert(new_tbl, result)
-      end
+      table.insert(new_tbl, result)
     end
     return new_tbl
   else
     for k, v in pairs(tbl) do
       local result = func(k, v)
-      if opts.skip_nil and result == nil then
-        -- Skip
-      else
-        table.insert(new_tbl, result)
-      end
+      table.insert(new_tbl, result)
     end
   end
 
@@ -42,12 +33,12 @@ end
 ---@param elem T
 ---@return boolean
 M.contains = function(tbl, elem)
-  for i, v in ipairs(tbl) do
-    if v == elem then return true end
-  end
-  return false
+  return M.any(tbl, function(_, v) return v == elem end)
 end
 
+-- Convert an iterator to a table
+-- Be careful of what you are passing in as arg. Because it can potentially cause an infinite loop
+--
 ---@generic T : any
 ---@param iter fun(): T
 ---@return T[]
@@ -90,10 +81,10 @@ end
 ---@generic T : any
 ---@generic V : any
 ---@param tbl table<any, T> | T[]
----@param accessor? fun(k: any, v: T): V
+---@param fn? fun(k: any, v: T): V
 ---@param opts? { is_array?: boolean | nil }
 ---@return V
-M.sum = function(tbl, accessor, opts)
+M.sum = function(tbl, fn, opts)
   opts = vim.tbl_extend("force", {
     is_array = nil, -- If nil, auto-detect if tbl is array
   }, opts or {})
@@ -101,10 +92,10 @@ M.sum = function(tbl, accessor, opts)
   return M.reduce(
     tbl,
     function(acc, i, v)
-      if not accessor then
+      if not fn then
         return acc + v
       else
-        return acc + accessor(i, v)
+        return acc + fn(i, v)
       end
     end,
     0,
