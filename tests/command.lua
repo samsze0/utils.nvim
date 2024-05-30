@@ -6,6 +6,6 @@ cmd_utils.create("TestCommand", "echo 'Hello, World!'", {
 })
 
 local cmd_list = cmd_utils.list()
-assert(
+T.assert(
   tbl_utils.any(cmd_list, function(_, cmd) return cmd.name == "TestCommand" end)
 )

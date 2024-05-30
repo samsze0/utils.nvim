@@ -13,13 +13,13 @@ local file_strs = {
 }
 
 local file_paths = file_utils.from_strs(file_strs)
-assert(file_paths[1]:basename() == "file4.js")
+T.assert_eq(file_paths[1]:basename(), "file4.js")
 
 local sorted_paths = file_utils.sort(file_paths)
 -- for _, p in ipairs(sorted_paths) do
 --   print(p:tostring())
 -- end
-assert(vim.deep_equal(sorted_paths, {
+T.assert_deep_eq(sorted_paths, {
   file_paths[8],
   file_paths[6],
   file_paths[2],
@@ -28,4 +28,4 @@ assert(vim.deep_equal(sorted_paths, {
   file_paths[1],
   file_paths[5],
   file_paths[4],
-}))
+})

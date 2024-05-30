@@ -9,7 +9,7 @@ if f == nil then error("tests/test-file.js does not exist") end
 vim.cmd("edit tests/test-file.js")
 
 -- Double check if test file has the expected content
-assert(vim.deep_equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
+T.assert_deep_eq(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
   "// 'hypot' is a binary function",
   "const hypot = (x, y) => Math.sqrt(x * x + y * y);",
   "",
@@ -22,10 +22,10 @@ assert(vim.deep_equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), {
   "",
   "// ...or evaluated",
   "thunk(); // === 5",
-}))
+})
 
-assert(not editor_utils.get_mode().blocking)
-assert(editor_utils.get_mode().mode == "n")
+T.assert(not editor_utils.get_mode().blocking)
+T.assert_eq(editor_utils.get_mode().mode, "n")
 
 -- FIX:
 -- Due to how editor.to_normal_mode() is broken, we cannot test cases where mode == "n"
@@ -35,26 +35,26 @@ assert(editor_utils.get_mode().mode == "n")
 vim.cmd("normal! gg")
 vim.cmd("normal! V")
 
-assert(not editor_utils.get_mode().blocking)
-assert(editor_utils.get_mode().mode == "V")
+T.assert_not(editor_utils.get_mode().blocking)
+T.assert_eq(editor_utils.get_mode().mode, "V")
 
 local selection = editor_utils.get_visual_selection()
-assert(vim.deep_equal(selection, { "// 'hypot' is a binary function" }))
+T.assert_deep_eq(selection, { "// 'hypot' is a binary function"} )
 
 -- Select between first and firth line (char select mode)
 
 vim.cmd("normal! 4j6e")
 vim.cmd("normal! v")
 
-assert(not editor_utils.get_mode().blocking)
-assert(editor_utils.get_mode().mode == "v")
+T.assert_not(editor_utils.get_mode().blocking)
+T.assert_eq(editor_utils.get_mode().mode, "v")
 
 local selection = editor_utils.get_visual_selection()
-assert(vim.deep_equal(selection, {
+T.assert_deep_eq(selection, {
   "// 'hypot' is a binary function",
   "const hypot = (x, y) => Math.sqrt(x * x + y * y);",
   "",
   "// 'thunk' is a function that takes no arguments and, when invoked, performs a potentially expensive",
   "// operation (computing a square",
-}))
+})
 

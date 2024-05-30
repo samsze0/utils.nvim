@@ -6,8 +6,9 @@
       "lua",
       "$VIMRUNTIME/lua",
       "${3rd}/luv/library",
-      ".test/external-dep/pathlib.nvim-723f9cd0d12a4bb8961cff4c2ac7edbfcf50a280/lua",
-      ".test/external-dep/nvim-nio-632024157d01e8bc48fd7df6a7de8ffe3fdd4f3a/lua"
+      ".test/external-dep/pathlib.nvim/lua",
+      ".test/external-dep/nvim-nio/lua",
+      ".test/lua"
     ],
     "checkThirdParty": false
   }
