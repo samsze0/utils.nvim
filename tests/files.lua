@@ -1,5 +1,4 @@
 local file_utils = require("utils.files")
-local debug = require("utils").debug
 
 local file_strs = {
   "dir1/dir2/file4.js",

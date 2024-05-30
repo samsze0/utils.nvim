@@ -1,5 +1,4 @@
 local time_utils = require("utils.time")
-local debug = require("utils").debug
 
 T.assert_eq(time_utils.human_readable_diff(os.time()), "just now")
 T.assert_eq(time_utils.human_readable_diff(os.time() - 60), "a minute ago")

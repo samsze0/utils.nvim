@@ -1,4 +1,3 @@
-local debug = require("utils").debug
 local editor_utils = require("utils.editor")
 
 -- Check if test-file.js exists

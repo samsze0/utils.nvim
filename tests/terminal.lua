@@ -1,5 +1,4 @@
 local terminal_utils = require("utils.terminal")
-local debug = require("utils").debug
 
 local opts = terminal_utils.shell_opts_tostring({
   ["--option1"] = "value1",

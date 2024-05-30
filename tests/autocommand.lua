@@ -1,5 +1,4 @@
 local autocmd_utils = require("utils.autocommand")
-local debug = require("utils").debug
 
 local group = autocmd_utils.create_group("Test")
 local autocmd = autocmd_utils.create({

@@ -169,7 +169,7 @@ end
 ---@param tbl table<any, T> | T[]
 ---@param fn fun(k: any, v: T): boolean
 ---@param opts? { is_array?: boolean | nil }
----@return any, T | nil
+---@return any | nil, T | nil
 M.find = function(tbl, fn, opts)
   opts = vim.tbl_extend("force", {
     is_array = nil, -- If nil, auto-detect if tbl is array
@@ -184,7 +184,18 @@ M.find = function(tbl, fn, opts)
       if fn(k, v) then return k, v end
     end
   end
-  return nil
+  return nil, nil
+end
+
+---@generic T : any
+---@param tbl table<any, T> | T[]
+---@param fn fun(k: any, v: T): boolean
+---@param opts? { is_array?: boolean | nil }
+---@return any, T
+M.find_unsafe = function(tbl, fn, opts)
+  local k, v = M.find(tbl, fn, opts)
+  if k == nil then error("Not found") end
+  return k, v
 end
 
 ---@generic T : any
@@ -201,27 +212,38 @@ end
 ---@generic T : any
 ---@generic U : any
 ---@param tbl table<any, T> | T[]
----@param accessor fun(k: any, v: T): U
----@param opts? { is_array?: boolean }
----@return U
-M.max = function(tbl, accessor, opts)
+---@param opts? { is_array?: boolean, init?: U, fn?: (fun(k: any, v: T): U) }
+---@return U?
+M.max = function(tbl, opts)
   opts = vim.tbl_extend("force", {
     is_array = nil, -- If nil, auto-detect if tbl is array
+    fn = function(k, v) return v end
   }, opts or {})
 
-  local max = nil
+  local max = opts.init
   if opts.is_array or (opts.is_array == nil and M.is_array(tbl)) then
     for i, v in ipairs(tbl) do
-      local value = accessor(i, v)
+      local value = opts.fn(i, v)
       if max == nil or value > max then max = value end
     end
   else
     for k, v in pairs(tbl) do
-      local value = accessor(k, v)
+      local value = opts.fn(k, v)
       if max == nil or value > max then max = value end
     end
   end
 
+  return max
+end
+
+---@generic T : any
+---@generic U : any
+---@param tbl table<any, T> | T[]
+---@param opts? { is_array?: boolean, init?: U, fn?: (fun(k: any, v: T): U) }
+---@return U
+M.max_unsafe = function(tbl, opts)
+  local max = M.max(tbl, opts)
+  if max == nil then error("No elements in list") end
   return max
 end
 
@@ -281,8 +303,6 @@ M.list_extend = function(...)
   local args = { ... }
   local result = {}
   for _, list in ipairs(args) do
-    if not M.is_array(list) then error("Expected array") end
-
     for _, v in ipairs(list) do
       table.insert(result, v)
     end

@@ -1,5 +1,4 @@
 local tbl_utils = require("utils.table")
-local debug = require("utils").debug
 
 T.assert_deep_eq(
   tbl_utils.map({ 1, 2, 3 }, function(k, v) return v * 2 end),
@@ -105,3 +104,117 @@ T.assert_deep_eq(result, { 1 })
 T.assert_error(function()
   return tbl_utils.join_first_two_elements({ 1 }, function(a, b) return a + b end, { error_if_insufficient_length = true })
 end)
+
+local i, v = tbl_utils.find({ "a", "b", "c" }, function(i, v) return v == "b" end)
+T.assert_eq(i, 2)
+T.assert_eq(v, "b")
+local i, v = tbl_utils.find({ 1, 2, 3 }, function(i, v) return v == 4 end)
+T.assert_eq(i, nil)
+T.assert_eq(v, nil)
+local i, v = tbl_utils.find({ a = "a", b = "b", c = "c" }, function(k, v) return v == "b" end)
+T.assert_eq(i, "b")
+T.assert_eq(v, "b")
+T.assert_error(function()
+  return tbl_utils.find_unsafe({ 1, 2, 3 }, function(i, v) return v == 4 end)
+end)
+local i, v = tbl_utils.find_unsafe({ 1, 2, 3 }, function(i, v) return v == 3 end)
+T.assert_eq(i, 3)
+T.assert_eq(v, 3)
+
+local result = tbl_utils.keys({ a = 1, b = 2, c = 3 })
+T.assert_contains(result, "a")
+T.assert_contains(result, "b")
+T.assert_contains(result, "c")
+T.assert_eq(#result, 3)
+
+T.assert_eq(tbl_utils.max({ 1, 2, 3 }), 3)
+T.assert_eq(tbl_utils.max({ a = 1, b = 2, c = 3 }), 3)
+T.assert_eq(tbl_utils.max({ 1, 2, 3 }, { init = 10 }), 10)
+T.assert_eq(tbl_utils.max({ 1, 2, 3 }, { fn = function(i, v)
+  return -v
+end }), -1)
+T.assert_error(function()
+  return tbl_utils.max_unsafe({ })
+end)
+
+T.assert_deep_eq(tbl_utils.sort({ 3, 1, 2 }, function(a, b)
+  return a < b
+end), { 1, 2, 3 })
+T.assert_deep_eq(tbl_utils.sort({ a = 3, b = 1, c = 2 }, function(a, b)
+  return a < b
+end), { "b", "c", "a" })
+T.assert_deep_eq(tbl_utils.sort({ 3, 1, 2 }, function(a, b)
+  return a > b
+end), { 3, 2, 1 })
+T.assert_deep_eq(tbl_utils.sort({ a = 3, b = 1, c = 2 }, function(a, b)
+  return a > b
+end), { "a", "c", "b" })
+
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 1,
+}), { 1, 2, 3 })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 2,
+}), { 2, 3 })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 3,
+}), { 3 })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 4,
+}), { })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 1,
+  last = 1,
+}), { 1 })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 1,
+  last = 2,
+}), { 1, 2 })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 1,
+  last = 3,
+}), { 1, 2, 3 })
+T.assert_deep_eq(tbl_utils.slice({ 1, 2, 3 }, {
+  first = 1,
+  last = 4,
+}), { 1, 2, 3 })
+
+T.assert_deep_eq(tbl_utils.list_extend({ 1, 2, 3 }, { 4, 5, 6 }), { 1, 2, 3, 4, 5, 6 })
+T.assert_deep_eq(tbl_utils.list_extend({ 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 }), { 1, 2, 3, 4, 5, 6, 7, 8, 9 })
+T.assert_deep_eq(tbl_utils.list_extend({ 1, 2, 3 }, { }), { 1, 2, 3 })
+
+T.assert(tbl_utils.any({ 1, 2, 3 }, function(i, v) return v == 2 end))
+T.assert(not tbl_utils.any({ 1, 2, 3 }, function(i, v) return v == 4 end))
+T.assert(tbl_utils.any({ a = 1, b = 2, c = 3 }, function(k, v) return v == 2 end))
+
+T.assert_deep_eq(tbl_utils.tbl_extend({
+  mode = "force"
+}, { a = 1, b = 2 }, { c = 3 }), { a = 1, b = 2, c = 3 })
+T.assert_deep_eq(tbl_utils.tbl_extend({
+  mode = "force"
+},
+{ a = 1, b = 2 }, { a = 3 }), { a = 3, b = 2 })
+T.assert_deep_eq(tbl_utils.tbl_extend({
+  mode = "force"
+}, { a = 1, b = 2 }, { a = 3, b = 4 }), { a = 3, b = 4 })
+T.assert_deep_eq(tbl_utils.tbl_extend({
+  mode = "force"
+}, { a = 1, b = 2 }, { a = 3, b = 4 }, { a = 5, b = 6 }), { a = 5, b = 6 })
+T.assert_error(function()
+  return tbl_utils.tbl_extend({
+    mode = "error"
+  }, { a = 1, b = 2 }, { a = 3 })
+end)
+T.assert_deep_eq(tbl_utils.tbl_extend({
+  mode = "error"
+}, { a = 1, b = 2 }, { c = 3, d = 4 }), { a = 1, b = 2, c = 3, d = 4 })
+T.assert_deep_eq(tbl_utils.tbl_extend({
+  mode = "keep"
+}, { a = 1, b = 2 }, { a = 3 }), { a = 1, b = 2 })
+
+T.assert_deep_eq(tbl_utils.tbl_deep_extend({
+  mode = "force"
+}, { [1] = { a = 1 }, [2] = { b = 2 } }, { [1] = { c = 3 } }), { [1] = { a = 1, c = 3 }, [2] = { b = 2 } })
+T.assert_deep_eq(tbl_utils.tbl_deep_extend({
+  mode = "force"
+}, { [1] = { a = 1 }, [2] = { b = 2 } }, { [1] = { a = 3 } }), { [1] = { a = 3 }, [2] = { b = 2 } })
