@@ -2,7 +2,7 @@
 
 An unopinionated set of utility functions for neovim plugins
 
-The goal of this plugin is to not "re-invent the wheel" and to work with existing neovim libraries/plugins to provide a more complete set of utility functions.
+The goal of this plugin is to work with existing neovim libraries/plugins to provide a more complete set of utility functions.
 
 A sub-goal of this library is to provide an intuitive wrapper interface over the neovim API. All utilities in this plugin are typed by the [lua-language-server's standard](https://github.com/LuaLS/lua-language-server/wiki/Annotations).
 
