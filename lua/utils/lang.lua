@@ -49,33 +49,35 @@ M.if_else = function(cond, true_expr, false_expr)
   end
 end
 
--- Nullish coalescing operator
+-- Recursive nullish coalescing
 --
 ---@generic T : any
 ---@param val T?
 ---@return T
 M.nullish = function(val)
-  if val == nil then
-    local tbl = { }
+  local function create_null_obj()
+    local tbl = { __is_null = true }
     setmetatable(tbl, {
-      __index = function() return nil end,
-      __call = function(args) return nil end
+      __index = function() return create_null_obj() end,
+      __call = function(args) return create_null_obj() end,
     })
     return tbl
+  end
+
+  if val == nil or (type(val) == "table" and val.__is_null) then
+    return create_null_obj()
   end
   return val
 end
 
 -- Safe require by wrapping the require call in pcall
--- To get proper typing support on the resulting module, use luals's `@module` annotation 
+-- To get proper typing support on the resulting module, use luals's `@module` annotation
 --
 ---@param module string
 ---@return any?
 M.safe_require = function(module)
   local ok, mod = pcall(require, module)
-  if not ok then
-    return nil
-  end
+  if not ok then return nil end
   return mod
 end
 
