@@ -49,6 +49,20 @@ M.if_else = function(cond, true_expr, false_expr)
   end
 end
 
+-- Nullish coalescing operator
+--
+---@generic T : any
+---@param val T?
+---@return T
+M.nullish = function(val)
+  if val == nil then
+    local tbl = { }
+    setmetatable(tbl, { __index = function() return nil end })
+    return tbl
+  end
+  return val
+end
+
 -- Safe require by wrapping the require call in pcall
 -- To get proper typing support on the resulting module, use luals's `@module` annotation 
 --
