@@ -57,7 +57,10 @@ end
 M.nullish = function(val)
   if val == nil then
     local tbl = { }
-    setmetatable(tbl, { __index = function() return nil end })
+    setmetatable(tbl, {
+      __index = function() return nil end,
+      __call = function(args) return nil end
+    })
     return tbl
   end
   return val
