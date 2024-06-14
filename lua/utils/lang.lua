@@ -34,4 +34,32 @@ M.switch = function(val, switches, default)
   return default(val)
 end
 
+-- If else expression
+--
+---@generic T : any
+---@param cond boolean
+---@param true_expr T
+---@param false_expr? T
+---@return T
+M.if_else = function(cond, true_expr, false_expr)
+  if cond then
+    return true_expr
+  else
+    return false_expr
+  end
+end
+
+-- Safe require by wrapping the require call in pcall
+-- To get proper typing support on the resulting module, use luals's `@module` annotation 
+--
+---@param module string
+---@return any?
+M.safe_require = function(module)
+  local ok, mod = pcall(require, module)
+  if not ok then
+    return nil
+  end
+  return mod
+end
+
 return M
