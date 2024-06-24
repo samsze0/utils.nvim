@@ -26,7 +26,7 @@ local nbsp = "\xe2\x80\x82" -- "\u{2002}"
 
 -- Split a string into parts
 --
----@alias StringSplitOpts { count?: number, sep?: string, include_remaining?: boolean, discard_empty?: boolean, trim?: boolean, plain?: boolean }
+---@alias StringSplitOpts { count?: number, sep?: string, include_remaining?: boolean, discard_empty?: boolean, trim?: boolean }
 ---@param str string
 ---@param opts? StringSplitOpts
 ---@return string[]
@@ -49,7 +49,7 @@ M.split = function(str, opts)
 
   str = str:gsub(opts.sep, nbsp, opts.count)
   result =
-    vim.split(str, nbsp, { trimempty = opts.discard_empty, plain = opts.plain })
+    vim.split(str, nbsp, { trimempty = opts.discard_empty, plain = false })
   if opts.count ~= nil and #result ~= opts.count + 1 then
     error(M.fmt("Expected", opts.count + 1, "parts, but got", result))
   end

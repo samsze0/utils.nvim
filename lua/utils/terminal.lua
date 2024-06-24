@@ -24,6 +24,8 @@ M.shell_opts_tostring = function(shell_opts)
       end
     elseif type(v) == "boolean" then
       if v then table.insert(result, k) end
+    elseif type(v) == "number" then
+      table.insert(result, k .. "=" .. tostring(v))
     else
       error("Unexpected type")
     end
