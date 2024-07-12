@@ -35,4 +35,18 @@ M.from_strs = function(paths)
   return tbl_utils.map(paths, function(_, p) return Path.new(p) end)
 end
 
+-- Get filetype using `vim.filetype`
+--
+---@param filepath string
+---@param opts? { read_content?: boolean }
+M.get_filetype = function(filepath, opts)
+  opts = opts or {}
+
+  local filename = vim.fn.fnamemodify(filepath, ":t")
+  return vim.filetype.match({
+    filename = filename,
+    contents = opts.read_content and vim.fn.readfile(filepath) or nil,
+  })
+end
+
 return M

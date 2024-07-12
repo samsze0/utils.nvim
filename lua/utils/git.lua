@@ -1,6 +1,7 @@
 local opts_utils = require("utils.opts")
 local tbl_utils = require("utils.table")
 local terminal_utils = require("utils.terminal")
+local str_utils = require("utils.string")
 
 local M = {}
 
@@ -99,6 +100,74 @@ M.convert_filepath_to_gitpath = function(filepath, opts)
     path = ""
   end
   return path
+end
+
+-- Return the result of `git show HEAD`
+--
+---@param gitpath string
+---@param opts? { git_dir?: string }
+M.show_head = function(gitpath, opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  return terminal_utils.systemlist_unsafe(
+    ("git -C '%s' show HEAD:'%s'"):format(opts.git_dir, gitpath)
+  )
+end
+
+-- Return the result of `git show`
+--
+---@param gitpath string
+---@param opts? { git_dir?: string }
+M.show_staged = function(gitpath, opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  return terminal_utils.systemlist_unsafe(
+    ("git -C '%s' show :'%s'"):format(opts.git_dir, gitpath)
+  )
+end
+
+-- Stash files
+--
+---@param opts? { git_dir?: string, message?: string, gitpaths: string[], stash_staged?: boolean }
+M.stash = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+    message = "wip",
+  }, opts)
+
+  if opts.gitpaths then
+    local paths = str_utils.join(opts.gitpaths, function(_, x)
+      return "'" .. x .. "'"
+    end)
+    terminal_utils.system_unsafe(
+      ([[git -C '%s' stash push -m '%s' -- %s]]):format(
+        opts.git_dir,
+        opts.message,
+        paths
+      )
+    )
+  end
+
+  if opts.stash_staged then
+    terminal_utils.system_unsafe(
+      ([[git -C '%s' stash push -m '%s' --staged]]):format(
+        opts.git_dir,
+        opts.message
+      )
+    )
+  end
+
+  error("Incorrect usage of git.stash")
 end
 
 return M
