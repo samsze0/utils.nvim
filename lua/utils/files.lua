@@ -70,7 +70,7 @@ M.read_file = function(filepath, opts)
     flags = flags .. "b"
   end
 
-  return vim.fn.read(filepath, flags, opts.max)
+  return vim.fn.readfile(filepath, flags, opts.max)
 end
 
 -- Write content to a file using vim.fn.writefile
