@@ -49,4 +49,45 @@ M.get_filetype = function(filepath, opts)
   })
 end
 
+-- Read the content of a file using vim.fn.readfile
+--
+---@param filepath string
+---@param opts? { binary?: boolean, max?: number }
+---@return string[]
+M.read_file = function(filepath, opts)
+  opts = opts or {}
+
+  local flags = ""
+  if opts.binary then
+    flags = flags .. "b"
+  end
+
+  return vim.fn.read(filepath, flags, opts.max)
+end
+
+-- Write content to a file using vim.fn.writefile
+--
+---@param lines string[]
+---@param filepath string
+---@param opts? { binary?: boolean, append?: boolean, delete?: boolean, fsync?: boolean }
+M.write_file = function(lines, filepath, opts)
+  opts = opts or {}
+
+  local flags = ""
+  if opts.binary then
+    flags = flags .. "b"
+  end
+  if opts.append then
+    flags = flags .. "a"
+  end
+  if opts.delete then
+    flags = flags .. "D"
+  end
+  if opts.fsync then
+    flags = flags .. "s"
+  end
+
+  vim.fn.writefile(lines, filepath, flags)
+end
+
 return M
