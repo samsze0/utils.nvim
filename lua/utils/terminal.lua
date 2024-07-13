@@ -184,4 +184,23 @@ M.systemlist_unsafe = function(cmd, opts)
   return result or {}
 end
 
+-- Show terminal formatted text (text with ansi escape seq) in a terminal buffer
+--
+---@param text string[]
+---@param opts? { buffer?: integer, new_buffer?: boolean }
+---@return fun(): nil close_terminal
+M.show_terminal_text = function(text, opts)
+  opts = opts or {}
+
+  local buffer
+  if opts.new_buffer then
+    buffer = vim.api.nvim_create_buf(false, true)
+  else
+    buffer = opts.buffer or vim.api.nvim_get_current_buf()
+  end
+  local channel_id = vim.api.nvim_open_term(buffer, {})
+
+  vim.api.nvim_chan_send(channel_id, table.concat(text, "\r\n"))
+end
+
 return M
