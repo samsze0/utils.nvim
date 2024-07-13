@@ -263,7 +263,7 @@ end
 -- If filepaths / ref are not given, then all commits are shown, otherwise only show the commits that
 -- are relevant to the given filepaths / ref
 --
----@param opts? { git_dir?: string, ref?: string, filepaths?: string[] }
+---@param opts? { git_dir?: string, ref?: string, filepaths?: string[], limit?: number, skip?: number }
 ---@return GitCommit[]
 M.list_commits = function(opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
@@ -284,6 +284,12 @@ M.list_commits = function(opts)
     opts.git_dir,
     format
   )
+  if opts.limit then
+    command = command .. ([[ -n %d]]):format(opts.limit)
+  end
+  if opts.skip then
+    command = command .. ([[ --skip %d]]):format(opts.skip)
+  end
 
   if opts.ref then command = command .. ([[ '%s']]):format(opts.ref) end
   if opts.filepaths then
