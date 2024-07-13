@@ -88,7 +88,7 @@ end
 ---@generic T : any
 ---@generic V : any
 ---@param tbl table<any, T> | T[]
----@param fn? fun(k: any, v: T): V
+---@param fn? fun(k: any, v: T): number
 ---@param opts? { is_array?: boolean | nil }
 ---@return V
 M.sum = function(tbl, fn, opts)
