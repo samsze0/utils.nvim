@@ -65,12 +65,22 @@ end
 M.read_file = function(filepath, opts)
   opts = opts or {}
 
+  ---@type string?
   local flags = ""
   if opts.binary then
     flags = flags .. "b"
   end
 
-  return vim.fn.readfile(filepath, flags, opts.max)
+  if flags == "" then
+    flags = nil
+  end
+
+  -- If nil is supplied as the max argument, then readfile will simply return {} (treat max = 0)
+  if opts.max ~= nil then
+    return vim.fn.readfile(filepath, flags, opts.max)
+  else
+    return vim.fn.readfile(filepath, flags)
+  end
 end
 
 -- Write content to a file using vim.fn.writefile
@@ -81,6 +91,7 @@ end
 M.write_file = function(lines, filepath, opts)
   opts = opts or {}
 
+  ---@type string?
   local flags = ""
   if opts.binary then
     flags = flags .. "b"
@@ -93,6 +104,10 @@ M.write_file = function(lines, filepath, opts)
   end
   if opts.fsync then
     flags = flags .. "s"
+  end
+
+  if flags == "" then
+    flags = nil
   end
 
   vim.fn.writefile(lines, filepath, flags)
