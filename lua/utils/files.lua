@@ -140,4 +140,17 @@ M.count_lines = function(filepath)
   return num_of_lines
 end
 
+-- Write content to a temporary file and return its path
+--
+---@param content string | string[]
+---@return string
+M.write_to_tmpfile = function(content)
+  local tmp = vim.fn.tempname()
+  vim.fn.writefile(
+    type(content) == "string" and vim.split(content, "\n") or content,
+    tmp
+  )
+  return tmp
+end
+
 return M

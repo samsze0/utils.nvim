@@ -102,6 +102,8 @@ M.convert_filepath_to_gitpath = function(filepath, opts)
   return path
 end
 
+-- Checkout a file at previous commit
+--
 -- Return the result of `git show HEAD`
 --
 ---@param gitpath string
@@ -118,6 +120,8 @@ M.show_head = function(gitpath, opts)
   )
 end
 
+-- Checkout a file at staging area
+--
 -- Return the result of `git show`
 --
 ---@param gitpath string
@@ -170,19 +174,80 @@ M.stash = function(opts)
   error("Incorrect usage of git.stash")
 end
 
--- Return the result of `git diff --stat HEAD`
+-- Retrieve the diff statistics
 --
+-- Return the result of `git diff --stat`
+-- By defeault, it shows the diff stat between worktree and previous commit (HEAD)
+--
+---@param opts? { git_dir?: string, ref?: string }
+---@return string
+M.diff_stat = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+    ref = "HEAD",
+  }, opts)
+
+  local stat = terminal_utils.system_unsafe(([[git -C '%s' diff --stat %s | tail -1]]):format(opts.git_dir, opts.ref))
+  return vim.trim(stat)
+end
+
+-- Retrieve the diff statistics for a stash
+--
+-- Return the result of `git stash show --stat`
+--
+---@param ref string
 ---@param opts? { git_dir?: string }
 ---@return string
-M.show_stat = function(opts)
+M.stash_diff_stat = function(ref, opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
 
   opts = opts_utils.extend({
     git_dir = M.current_dir(),
   }, opts)
 
-  local stat = terminal_utils.system_unsafe(([[git -C '%s' diff --stat HEAD | tail -1]]):format(opts.git_dir))
+  local stat = terminal_utils.system_unsafe(([[git -C '%s' stash show --stat %s | tail -1]]):format(opts.git_dir, ref))
   return vim.trim(stat)
+end
+
+-- Retrieve the list of stashes
+--
+---@param opts? { git_dir?: string }
+---@return string[]
+M.list_stash = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local command = ([[git -C '%s' stash list]]):format(opts.git_dir)
+  local stash = terminal_utils.systemlist_unsafe(command, {
+    keepempty = false,
+    trim_endline = true
+  })
+
+  return stash
+end
+
+-- Checkout a file at specific stash
+--
+-- Return the result of `git show stash:file`
+--
+---@param gitpath string
+---@param opts? { git_dir?: string }
+M.show_stash_file = function(gitpath, opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local stash = terminal_utils.systemlist_unsafe(
+    ([[git -C '%s' show stash:'%s']]):format(M.current_dir(), gitpath)
+  )
+  return stash
 end
 
 return M
