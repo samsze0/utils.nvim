@@ -30,6 +30,13 @@ end
 
 ---@generic T : any
 ---@param tbl table<any, T>
+---@return T[]
+M.values = function(tbl)
+  return M.map(tbl, function(_, v) return v end)
+end
+
+---@generic T : any
+---@param tbl table<any, T>
 ---@param elem T
 ---@return boolean
 M.contains = function(tbl, elem)
