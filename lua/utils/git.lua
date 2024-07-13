@@ -170,14 +170,18 @@ M.stash = function(opts)
   error("Incorrect usage of git.stash")
 end
 
--- Return the result of `git show --shortstat`
+-- Return the result of `git diff --stat HEAD`
 --
 ---@param opts? { git_dir?: string }
 ---@return string
-M.show_stat_short = function(opts)
+M.show_stat = function(opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
 
-  local stat = terminal_utils.system_unsafe([[git show --shortstat --format=""]])
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local stat = terminal_utils.system_unsafe(([[git -C '%s' diff --stat HEAD | tail -1]]):format(opts.git_dir))
   return vim.trim(stat)
 end
 
