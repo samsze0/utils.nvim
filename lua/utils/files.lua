@@ -118,13 +118,35 @@ end
 ---@param filepath string
 ---@return boolean
 M.is_binary = function(filepath)
-  local result, status, _ =
-    terminal_utils.system("file --mime " .. filepath)
-  if status ~= 0 then
-    error("Failed to get file type for " .. filepath)
-  end
-  ---@cast result string
-  return result:match("charset=binary")
+  return M.get_mime_encoding(filepath) == "binary"
+end
+
+-- Check if a file is text using `file --mime`
+--
+---@param filepath string
+---@return boolean
+M.is_text = function(filepath)
+  return M.get_mime_type(filepath):match("^text/")
+end
+
+-- Get the mime type of a file using `file --mime-type`
+-- https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+--
+---@param filepath string
+---@return string
+M.get_mime_type = function(filepath)
+  local output = terminal_utils.system_unsafe(("file --mime-type -F %s '%s'"):format(terminal_utils.nbsp, filepath))
+  return vim.trim(vim.split(output, terminal_utils.nbsp)[2])
+end
+
+
+-- Get the mime encoding of a file using `file --mime-encoding`
+--
+---@param filepath string
+---@return string
+M.get_mime_encoding = function(filepath)
+  local output = terminal_utils.system_unsafe(("file --mime-encoding -F %s '%s'"):format(terminal_utils.nbsp, filepath))
+  return vim.trim(vim.split(output, terminal_utils.nbsp)[2])
 end
 
 -- Count the number of lines in a file using `wc -l`
