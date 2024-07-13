@@ -1,4 +1,5 @@
 local tbl_utils = require("utils.table")
+local terminal_utils = require("utils.terminal")
 local Path = require("pathlib")
 
 local M = {}
@@ -38,14 +39,21 @@ end
 -- Get filetype using `vim.filetype`
 --
 ---@param filepath string
----@param opts? { read_content?: boolean }
+---@param opts? { read_content?: boolean, content?: string[] }
 M.get_filetype = function(filepath, opts)
   opts = opts or {}
+
+  local content = nil
+  if opts.content then
+    content = opts.content
+  elseif opts.read_content then
+    content = M.read_file(filepath, { binary = true })
+  end
 
   local filename = vim.fn.fnamemodify(filepath, ":t")
   return vim.filetype.match({
     filename = filename,
-    contents = opts.read_content and vim.fn.readfile(filepath) or nil,
+    contents = content,
   })
 end
 
@@ -88,6 +96,33 @@ M.write_file = function(lines, filepath, opts)
   end
 
   vim.fn.writefile(lines, filepath, flags)
+end
+
+-- Check if a file is binary using `file --mime`
+--
+---@param filepath string
+---@return boolean
+M.is_binary = function(filepath)
+  local result, status, _ =
+    terminal_utils.system("file --mime " .. filepath)
+  if status ~= 0 then
+    error("Failed to get file type for " .. filepath)
+  end
+  ---@cast result string
+  return result:match("charset=binary")
+end
+
+-- Count the number of lines in a file using `wc -l`
+--
+---@param filepath string
+---@return number
+M.count_lines = function(filepath)
+  local num_of_lines = terminal_utils.system_unsafe("wc -l < " .. filepath)
+  num_of_lines = tonumber(vim.trim(num_of_lines)) ---@diagnostic disable-line: cast-local-type
+  if not num_of_lines then
+    error("Failed to get number of lines for " .. filepath)
+  end
+  return num_of_lines
 end
 
 return M
