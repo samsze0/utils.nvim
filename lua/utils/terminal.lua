@@ -98,6 +98,17 @@ end
 -- http://unicode-search.net/unicode-namesearch.pl?term=SPACE&.submit=Search
 M.nbsp = "\xe2\x80\x82" -- "\u{2002}"
 
+-- Join several string parts by the nbsp character
+--
+---@vararg string
+---@return string
+M.join_by_nbsp = function(...)
+  local args = { ... }
+  local size = #args
+
+  return (("%s"):rep(size, M.nbsp)):format(...)
+end
+
 -- vim.fn.system wrapper
 -- Run a shell command and return the output as a string
 --

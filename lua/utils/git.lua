@@ -250,4 +250,121 @@ M.show_stash_file = function(gitpath, opts)
   return stash
 end
 
+---@class GitCommit
+---@field hash string
+---@field subject string
+---@field ref_names string
+---@field author string
+---@field commit_date string
+
+-- Retrieve the list of commits
+--
+-- Return the result of `git log --oneline`
+-- If filepaths / ref are not given, then all commits are shown, otherwise only show the commits that
+-- are relevant to the given filepaths / ref
+--
+---@param opts? { git_dir?: string, ref?: string, filepaths?: string[] }
+---@return GitCommit[]
+M.list_commits = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local format = terminal_utils.join_by_nbsp(
+    "%h", -- Hash
+    "%s", -- Subject
+    "%D", -- Ref names
+    "%an", -- Author
+    "%cr" -- Commit date (relative)
+  )
+
+  local command = ([[git -C '%s' log --oneline --pretty=format:'%s']]):format(
+    opts.git_dir,
+    format
+  )
+
+  if opts.ref then command = command .. ([[ '%s']]):format(opts.ref) end
+  if opts.filepaths then
+    command = command .. ([[ -- %s]]):format(table.concat(tbl_utils.map(opts.filepaths, function(_, f)
+      return "'" .. f .. "'"
+    end), " "))
+  end
+
+  local output = terminal_utils.systemlist_unsafe(command, {
+    keepempty = false,
+    trim_endline = true
+  })
+  return tbl_utils.map(output, function(_, e)
+    local parts = vim.split(e, terminal_utils.nbsp)
+    if #parts ~= 5 then error("Invalid git commit entry: " .. e) end
+
+    return {
+      hash = parts[1],
+      subject = parts[2],
+      ref_names = parts[3],
+      author = parts[4],
+      commit_date = parts[5],
+    }
+  end)
+end
+
+-- Show diff using delta
+--
+-- Return the result of `git show | delta`
+--
+---@param opts? { git_dir?: string, ref?: string, filepaths?: string[], delta_args?: ShellOpts }
+---@return string[]
+M.show_diff_with_delta = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+    delta_args = {},
+  }, opts)
+
+  local filepaths
+  if opts.filepaths then
+    filepaths = table.concat(tbl_utils.map(opts.filepaths, function(_, f)
+      return "'" .. f .. "'"
+    end), " ")
+  end
+
+  local output = terminal_utils.systemlist_unsafe(
+    ([[git -C '%s' show --color %s %s | delta %s]]):format(
+      opts.git_dir,
+      opts.ref and ("'" .. opts.ref .. "'") or "",
+      filepaths or "",
+      terminal_utils.shell_opts_tostring(opts.delta_args)
+    )
+  )
+  return output
+end
+
+-- Show stash with delta
+--
+-- Return the result of `git stash show | delta`
+--
+---@param ref string
+---@param opts? { git_dir?: string, delta_args?: ShellOpts }
+---@return string[]
+M.show_stash_with_delta = function(ref, opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+    delta_args = {},
+  }, opts)
+
+  local output = terminal_utils.systemlist_unsafe(
+    ([[git -C '%s' stash show --full-index --color '%s' | delta %s]]):format(
+      opts.git_dir,
+      ref,
+      terminal_utils.shell_opts_tostring(opts.delta_args)
+    )
+  )
+  return output
+end
+
 return M
