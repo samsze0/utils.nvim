@@ -170,4 +170,15 @@ M.stash = function(opts)
   error("Incorrect usage of git.stash")
 end
 
+-- Return the result of `git show --shortstat`
+--
+---@param opts? { git_dir?: string }
+---@return string
+M.show_stat_short = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  local stat = terminal_utils.system_unsafe([[git show --shortstat --format=""]])
+  return vim.trim(stat)
+end
+
 return M
