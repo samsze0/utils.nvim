@@ -121,12 +121,13 @@ M.is_binary = function(filepath)
   return M.get_mime_encoding(filepath) == "binary"
 end
 
--- Check if a file is text using `file --mime`
+-- Check if a file is text (or json) using `file --mime`
 --
 ---@param filepath string
 ---@return boolean
 M.is_text = function(filepath)
-  return M.get_mime_type(filepath):match("^text/")
+  local mime_type = M.get_mime_type(filepath)
+  return mime_type:match("^text/") or mime_type:match("^application/json")
 end
 
 -- Get the mime type of a file using `file --mime-type`
