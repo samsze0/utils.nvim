@@ -1,3 +1,5 @@
+local uv_utils = require("utils.uv")
+
 local M = {}
 
 M.OS = vim.loop.os_uname().sysname
@@ -62,6 +64,17 @@ EOF
   else
     error("Unsupported OS")
   end
+end
+
+-- Find an available OS port
+--
+---@return number
+M.find_available_port = function()
+  local tcp_server = uv_utils.create_tcp_server("127.0.0.1", function(message)
+  end)
+  local port = tcp_server.port
+  tcp_server.close()
+  return port
 end
 
 return M
