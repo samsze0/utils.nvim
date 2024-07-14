@@ -19,11 +19,14 @@ end
 ---@param opts? { }
 function M.list(opts)
   local commands = vim.api.nvim_get_commands({ builtin = false })
-  return tbl_utils.map(commands, function (name, cmd)
-    return {
-      name = name,
-    }
-  end)
+  return tbl_utils.map(
+    commands,
+    function(name, cmd)
+      return {
+        name = name,
+      }
+    end
+  )
 end
 
 return M

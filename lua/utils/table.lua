@@ -224,7 +224,7 @@ end
 M.max = function(tbl, opts)
   opts = vim.tbl_extend("force", {
     is_array = nil, -- If nil, auto-detect if tbl is array
-    fn = function(k, v) return v end
+    fn = function(k, v) return v end,
   }, opts or {})
 
   local max = opts.init

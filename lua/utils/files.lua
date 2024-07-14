@@ -67,13 +67,9 @@ M.read_file = function(filepath, opts)
 
   ---@type string?
   local flags = ""
-  if opts.binary then
-    flags = flags .. "b"
-  end
+  if opts.binary then flags = flags .. "b" end
 
-  if flags == "" then
-    flags = nil
-  end
+  if flags == "" then flags = nil end
 
   -- If nil is supplied as the max argument, then readfile will simply return {} (treat max = 0)
   if opts.max ~= nil then
@@ -93,22 +89,12 @@ M.write_file = function(lines, filepath, opts)
 
   ---@type string?
   local flags = ""
-  if opts.binary then
-    flags = flags .. "b"
-  end
-  if opts.append then
-    flags = flags .. "a"
-  end
-  if opts.delete then
-    flags = flags .. "D"
-  end
-  if opts.fsync then
-    flags = flags .. "s"
-  end
+  if opts.binary then flags = flags .. "b" end
+  if opts.append then flags = flags .. "a" end
+  if opts.delete then flags = flags .. "D" end
+  if opts.fsync then flags = flags .. "s" end
 
-  if flags == "" then
-    flags = nil
-  end
+  if flags == "" then flags = nil end
 
   vim.fn.writefile(lines, filepath, flags)
 end
@@ -136,17 +122,20 @@ end
 ---@param filepath string
 ---@return string
 M.get_mime_type = function(filepath)
-  local output = terminal_utils.system_unsafe(("file --mime-type -F %s '%s'"):format(terminal_utils.nbsp, filepath))
+  local output = terminal_utils.system_unsafe(
+    ("file --mime-type -F %s '%s'"):format(terminal_utils.nbsp, filepath)
+  )
   return vim.trim(vim.split(output, terminal_utils.nbsp)[2])
 end
-
 
 -- Get the mime encoding of a file using `file --mime-encoding`
 --
 ---@param filepath string
 ---@return string
 M.get_mime_encoding = function(filepath)
-  local output = terminal_utils.system_unsafe(("file --mime-encoding -F %s '%s'"):format(terminal_utils.nbsp, filepath))
+  local output = terminal_utils.system_unsafe(
+    ("file --mime-encoding -F %s '%s'"):format(terminal_utils.nbsp, filepath)
+  )
   return vim.trim(vim.split(output, terminal_utils.nbsp)[2])
 end
 

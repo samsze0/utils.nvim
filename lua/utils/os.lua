@@ -70,8 +70,10 @@ end
 --
 ---@return number
 M.find_available_port = function()
-  local tcp_server = uv_utils.create_tcp_server("127.0.0.1", function(message)
-  end)
+  local tcp_server = uv_utils.create_tcp_server(
+    "127.0.0.1",
+    function(message) end
+  )
   local port = tcp_server.port
   tcp_server.close()
   return port

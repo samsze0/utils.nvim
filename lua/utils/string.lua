@@ -158,8 +158,6 @@ end
 -- Uppercase the first letter
 --
 ---@param str string
-M.title_case = function(str)
-  return str:gsub("^%l", string.upper)
-end
+M.title_case = function(str) return str:gsub("^%l", string.upper) end
 
 return M

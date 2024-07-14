@@ -150,9 +150,10 @@ M.stash = function(opts)
   }, opts)
 
   if opts.gitpaths then
-    local paths = str_utils.join(opts.gitpaths, function(_, x)
-      return "'" .. x .. "'"
-    end)
+    local paths = str_utils.join(
+      opts.gitpaths,
+      function(_, x) return "'" .. x .. "'" end
+    )
     terminal_utils.system_unsafe(
       ([[git -C '%s' stash push -m '%s' -- %s]]):format(
         opts.git_dir,
@@ -189,7 +190,9 @@ M.diff_stat = function(opts)
     ref = "HEAD",
   }, opts)
 
-  local stat = terminal_utils.system_unsafe(([[git -C '%s' diff --stat %s | tail -1]]):format(opts.git_dir, opts.ref))
+  local stat = terminal_utils.system_unsafe(
+    ([[git -C '%s' diff --stat %s | tail -1]]):format(opts.git_dir, opts.ref)
+  )
   return vim.trim(stat)
 end
 
@@ -207,7 +210,9 @@ M.stash_diff_stat = function(ref, opts)
     git_dir = M.current_dir(),
   }, opts)
 
-  local stat = terminal_utils.system_unsafe(([[git -C '%s' stash show --stat %s | tail -1]]):format(opts.git_dir, ref))
+  local stat = terminal_utils.system_unsafe(
+    ([[git -C '%s' stash show --stat %s | tail -1]]):format(opts.git_dir, ref)
+  )
   return vim.trim(stat)
 end
 
@@ -225,7 +230,7 @@ M.list_stash = function(opts)
   local command = ([[git -C '%s' stash list]]):format(opts.git_dir)
   local stash = terminal_utils.systemlist_unsafe(command, {
     keepempty = false,
-    trim_endline = true
+    trim_endline = true,
   })
 
   return stash
@@ -284,23 +289,26 @@ M.list_commits = function(opts)
     opts.git_dir,
     format
   )
-  if opts.limit then
-    command = command .. ([[ -n %d]]):format(opts.limit)
-  end
-  if opts.skip then
-    command = command .. ([[ --skip %d]]):format(opts.skip)
-  end
+  if opts.limit then command = command .. ([[ -n %d]]):format(opts.limit) end
+  if opts.skip then command = command .. ([[ --skip %d]]):format(opts.skip) end
 
   if opts.ref then command = command .. ([[ '%s']]):format(opts.ref) end
   if opts.filepaths then
-    command = command .. ([[ -- %s]]):format(table.concat(tbl_utils.map(opts.filepaths, function(_, f)
-      return "'" .. f .. "'"
-    end), " "))
+    command = command
+      .. ([[ -- %s]]):format(
+        table.concat(
+          tbl_utils.map(
+            opts.filepaths,
+            function(_, f) return "'" .. f .. "'" end
+          ),
+          " "
+        )
+      )
   end
 
   local output = terminal_utils.systemlist_unsafe(command, {
     keepempty = false,
-    trim_endline = true
+    trim_endline = true,
   })
   return tbl_utils.map(output, function(_, e)
     local parts = vim.split(e, terminal_utils.nbsp)
@@ -332,9 +340,10 @@ M.show_diff_with_delta = function(opts)
 
   local filepaths
   if opts.filepaths then
-    filepaths = table.concat(tbl_utils.map(opts.filepaths, function(_, f)
-      return "'" .. f .. "'"
-    end), " ")
+    filepaths = table.concat(
+      tbl_utils.map(opts.filepaths, function(_, f) return "'" .. f .. "'" end),
+      " "
+    )
   end
 
   local output = terminal_utils.systemlist_unsafe(
@@ -392,7 +401,7 @@ end
 ---@return GitChangedFile[]
 M.list_changed_files = function(opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
-  
+
   opts = opts_utils.extend({
     git_dir = M.current_dir(),
   }, opts)
@@ -411,7 +420,7 @@ M.list_changed_files = function(opts)
     local status = e:sub(1, 1)
     local gitpath = vim.trim(e:sub(2))
     local filepath = opts.git_dir .. "/" .. gitpath
-  
+
     -- Cater "rename" i.e. xxx -> xxx
     -- TODO: check if git path contains " -> "
     if gitpath:find(" -> ") then
@@ -419,14 +428,14 @@ M.list_changed_files = function(opts)
       gitpath = parts[2]
       filepath = opts.git_dir .. "/" .. gitpath
     end
-  
+
     local added = status == "A"
     local modified = status == "M"
     local deleted = status == "D"
     local renamed = status == "R"
     local copied = status == "C"
     local type_changed = status == "T"
-  
+
     return {
       gitpath = gitpath,
       filepath = filepath,
@@ -460,12 +469,14 @@ end
 ---@return GitStatus[]
 M.list_status = function(opts)
   if vim.fn.executable("git") ~= 1 then error("git is not installed") end
-  
+
   opts = opts_utils.extend({
     git_dir = M.current_dir(),
   }, opts)
 
-  local command = ([[git -C '%s' -c color.status=false status --untracked --short]]):format(opts.git_dir)
+  local command = ([[git -C '%s' -c color.status=false status --untracked --short]]):format(
+    opts.git_dir
+  )
 
   local output = terminal_utils.systemlist_unsafe(command, {
     keepempty = false,
@@ -476,7 +487,7 @@ M.list_status = function(opts)
     local status = e:sub(1, 2)
     local gitpath = e:sub(4)
     local filepath = opts.git_dir .. "/" .. gitpath
-  
+
     -- Cater "rename" i.e. xxx -> xxx
     -- TODO: check if git path contains " -> "
     if gitpath:find(" -> ") then
@@ -484,28 +495,28 @@ M.list_status = function(opts)
       gitpath = parts[2]
       filepath = opts.git_dir .. "/" .. gitpath
     end
-  
+
     if status == "??" then status = " ?" end
 
     local status_x = status:sub(1, 1)
     local status_y = status:sub(2, 2)
-  
+
     local is_fully_staged = status_x == "M" and status_y == " "
     local is_partially_staged = status_x == "M" and status_y == "M"
     local is_untracked = status_y == "?"
     local unstaged = status_x == " " and not is_untracked
     local has_merge_conflicts = status_x == "U"
     local worktree_clean = status_y == " "
-  
+
     local added = status_x == "A" and worktree_clean
     local modified = status_x == "M" or status_y == "M"
     local deleted = status_x == "D" or status_y == "D"
     local renamed = status_x == "R" and worktree_clean
     local copied = status_x == "C" and worktree_clean
     local type_changed = status_x == "T" and worktree_clean
-  
+
     local ignored = status_x == "!" and status_y == "!"
-  
+
     return {
       gitpath = gitpath,
       filepath = filepath,
