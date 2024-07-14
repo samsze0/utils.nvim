@@ -156,4 +156,41 @@ M.schedule_if_needed = function(fn)
   end
 end
 
+-- Debounce a function
+-- Only invoke a function if it has not been called for a certain amount of time
+--
+---@generic T : function
+---@param callback T
+---@param delay number Delay in milliseconds
+---@param opts? { run_in_main_loop: boolean }
+---@return T
+M.debounce = function(callback, delay, opts)
+  opts = opts or {}
+
+  ---@type uv_timer_t?
+  local timer
+
+  return function(...)
+    local args = { ... }
+
+    if timer then
+      timer:stop()
+    end
+
+    timer = uv.new_timer()
+    timer:start(delay, 0, function()
+      if opts.run_in_main_loop then
+        M.schedule_if_needed(function()
+          callback(unpack(args))
+        end)
+      else
+        callback(unpack(args))
+      end
+
+      timer:close()
+      timer = nil
+    end)
+  end
+end
+
 return M
