@@ -373,4 +373,188 @@ M.show_stash_with_delta = function(ref, opts)
   return output
 end
 
+---@class GitChangedFile
+---@field gitpath string
+---@field filepath string
+---@field status string
+---@field added boolean
+---@field deleted boolean
+---@field renamed boolean
+---@field copied boolean
+---@field type_changed boolean
+---@field modified boolean
+
+-- List changed files incurred by a commit, or a stash, or any other git object
+--
+-- Return the result of `git show --name-status ref`
+--
+---@param opts { git_dir?: string, ref: string }
+---@return GitChangedFile[]
+M.list_changed_files = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+  
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local command = ([[git -C '%s' show --pretty=format: --name-status '%s']]):format(
+    opts.git_dir,
+    opts.ref
+  )
+
+  local output = terminal_utils.systemlist_unsafe(command, {
+    keepempty = false,
+    trim_endline = true,
+  })
+
+  return tbl_utils.map(output, function(i, e)
+    local status = e:sub(1, 1)
+    local gitpath = vim.trim(e:sub(2))
+    local filepath = opts.git_dir .. "/" .. gitpath
+  
+    -- Cater "rename" i.e. xxx -> xxx
+    -- TODO: check if git path contains " -> "
+    if gitpath:find(" -> ") then
+      local parts = str_utils.split(gitpath, " -> ")
+      gitpath = parts[2]
+      filepath = opts.git_dir .. "/" .. gitpath
+    end
+  
+    local added = status == "A"
+    local modified = status == "M"
+    local deleted = status == "D"
+    local renamed = status == "R"
+    local copied = status == "C"
+    local type_changed = status == "T"
+  
+    return {
+      gitpath = gitpath,
+      filepath = filepath,
+      status = status,
+      added = added,
+      deleted = deleted,
+      renamed = renamed,
+      copied = copied,
+      type_changed = type_changed,
+      modified = modified,
+    }
+  end)
+end
+
+---@class GitStatus : GitChangedFile
+---@field status_x string
+---@field status_y string
+---@field is_fully_staged boolean
+---@field is_partially_staged boolean
+---@field is_untracked boolean
+---@field unstaged boolean
+---@field has_merge_conflicts boolean
+---@field worktree_clean boolean
+---@field ignored boolean
+
+-- List changed files between HEAD <-> staging-area <-> worktree
+--
+-- Return the result of `git status --untracked`
+--
+---@param opts? { git_dir?: string }
+---@return GitStatus[]
+M.list_status = function(opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+  
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local command = ([[git -C '%s' -c color.status=false status --untracked --short]]):format(opts.git_dir)
+
+  local output = terminal_utils.systemlist_unsafe(command, {
+    keepempty = false,
+    trim_endline = true,
+  })
+
+  return tbl_utils.map(output, function(i, e)
+    local status = e:sub(1, 2)
+    local gitpath = e:sub(4)
+    local filepath = opts.git_dir .. "/" .. gitpath
+  
+    -- Cater "rename" i.e. xxx -> xxx
+    -- TODO: check if git path contains " -> "
+    if gitpath:find(" -> ") then
+      local parts = str_utils.split(gitpath, " -> ")
+      gitpath = parts[2]
+      filepath = opts.git_dir .. "/" .. gitpath
+    end
+  
+    if status == "??" then status = " ?" end
+
+    local status_x = status:sub(1, 1)
+    local status_y = status:sub(2, 2)
+  
+    local is_fully_staged = status_x == "M" and status_y == " "
+    local is_partially_staged = status_x == "M" and status_y == "M"
+    local is_untracked = status_y == "?"
+    local unstaged = status_x == " " and not is_untracked
+    local has_merge_conflicts = status_x == "U"
+    local worktree_clean = status_y == " "
+  
+    local added = status_x == "A" and worktree_clean
+    local modified = status_x == "M" or status_y == "M"
+    local deleted = status_x == "D" or status_y == "D"
+    local renamed = status_x == "R" and worktree_clean
+    local copied = status_x == "C" and worktree_clean
+    local type_changed = status_x == "T" and worktree_clean
+  
+    local ignored = status_x == "!" and status_y == "!"
+  
+    return {
+      gitpath = gitpath,
+      filepath = filepath,
+      status = status,
+      status_x = status_x,
+      status_y = status_y,
+      is_fully_staged = is_fully_staged,
+      is_partially_staged = is_partially_staged,
+      is_untracked = is_untracked,
+      unstaged = unstaged,
+      worktree_clean = worktree_clean,
+      has_merge_conflicts = has_merge_conflicts,
+      added = added,
+      modified = modified,
+      deleted = deleted,
+      renamed = renamed,
+      copied = copied,
+      type_changed = type_changed,
+      ignored = ignored,
+    }
+  end)
+end
+
+-- Checkout a file at specific commit, or any other git object
+--
+-- Return the result of `git cat-file blob`
+--
+---@param gitpath string
+---@param opts { git_dir?: string, ref: string, before_ref?: boolean }
+---@return string[]?
+M.show_file = function(gitpath, opts)
+  if vim.fn.executable("git") ~= 1 then error("git is not installed") end
+
+  opts = opts_utils.extend({
+    git_dir = M.current_dir(),
+  }, opts)
+
+  local output, status, _ = terminal_utils.systemlist(
+    ([[git -C '%s' cat-file blob '%s'%s:'%s']]):format(
+      opts.git_dir,
+      opts.ref,
+      opts.before_ref and "~1" or "",
+      gitpath
+    ),
+    {
+      keepempty = true,
+    }
+  )
+  return output
+end
+
 return M
