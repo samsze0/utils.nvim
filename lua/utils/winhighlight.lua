@@ -9,6 +9,8 @@ local M = {}
 ---@param str string
 ---@return WinHighlights
 M.from_str = function(str)
+  if str == nil then return {} end
+
   local values = vim.split(str, ",")
   return tbl_utils.reduce(values, function(acc, _, v)
     local parts = vim.split(v, ":")
