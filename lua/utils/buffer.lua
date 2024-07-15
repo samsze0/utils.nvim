@@ -19,4 +19,14 @@ function M.get_bufs_info(opts)
   end)
 end
 
+---@param buf? integer
+---@param opts { on_lines?: (fun(lines: string[])), on_bytes?: (fun(bytes: string[])) }
+function M.attach(buf, opts)
+  local ok = vim.api.nvim_buf_attach(buf or 0, false, {
+    on_lines = opts.on_lines and function(lines) opts.on_lines(lines) end,
+    on_bytes = opts.on_bytes and function(bytes) opts.on_bytes(bytes) end,
+  })
+  if not ok then error("Failed to attach to buffer") end
+end
+
 return M
