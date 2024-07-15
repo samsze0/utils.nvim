@@ -7,7 +7,7 @@ local M = {}
 --
 ---@param on_message fun(message: string): nil
 ---@param opts? {}
----@return { handle: uv_pipe_t, close: function, pipe_name: string }
+---@return { handle: uv.uv_pipe_t, close: function, pipe_name: string }
 M.create_named_pipe_server = function(on_message, opts)
   opts = opts or {}
 
@@ -59,11 +59,12 @@ end
 ---@param host string
 ---@param on_message fun(message: string): nil
 ---@param opts? {}
----@return { handle: uv_tcp_t, close: function, host: string, port: number }
+---@return { handle: uv.uv_tcp_t, close: function, host: string, port: number }
 M.create_tcp_server = function(host, on_message, opts)
   opts = opts or {}
 
-  local tcp_handle = uv.new_tcp()
+  local tcp_handle, err = uv.new_tcp()
+  assert(tcp_handle, err)
 
   local ok, err = tcp_handle:bind(host, 0)
   if not ok then
@@ -81,7 +82,7 @@ M.create_tcp_server = function(host, on_message, opts)
 
   local port = sockname.port
 
-  ---@type uv_tcp_t[]
+  ---@type uv.uv_tcp_t[]
   local clients = {}
   local close = function()
     -- Seems like clients close themselves. So no need to close them manually
@@ -118,8 +119,8 @@ M.create_tcp_server = function(host, on_message, opts)
 end
 
 ---@param filepath string
----@param on_file_change fun(events: uv.aliases.fs_event_start_callback_events): nil
----@param flags uv.aliases.fs_event_start_flags
+---@param on_file_change fun(events: uv.fs_event_start.callback.events): nil
+---@param flags uv.fs_event_start.flags
 ---@param debounce_delay number
 M.watch_file = function(filepath, on_file_change, flags, debounce_delay)
   local fullpath = vim.fn.fnamemodify(filepath, ":p")
@@ -167,22 +168,21 @@ end
 M.debounce = function(callback, delay, opts)
   opts = opts or {}
 
-  ---@type uv_timer_t?
+  ---@type uv.uv_timer_t?
   local timer
+  local err
 
   return function(...)
     local args = { ... }
 
-    if timer then
-      timer:stop()
-    end
+    if timer then timer:stop() end
 
-    timer = uv.new_timer()
+    timer, err = uv.new_timer()
+    assert(timer, err)
+
     timer:start(delay, 0, function()
       if opts.run_in_main_loop then
-        M.schedule_if_needed(function()
-          callback(unpack(args))
-        end)
+        M.schedule_if_needed(function() callback(unpack(args)) end)
       else
         callback(unpack(args))
       end

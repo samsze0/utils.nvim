@@ -5,7 +5,7 @@ local M = {}
 
 -- Convert shell opts to string
 --
----@alias ShellOpts table<string, string | boolean | (string | boolean)[]>
+---@alias ShellOpts table<string, string | boolean | number | (string | boolean | number)[]>
 ---@param shell_opts ShellOpts
 ---@return string
 M.shell_opts_tostring = function(shell_opts)
