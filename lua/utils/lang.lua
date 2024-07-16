@@ -36,6 +36,8 @@ end
 
 -- If else expression
 --
+-- Be careful with this function because unlike Lua's `x and y or z`, this is not short-circuiting
+--
 ---@generic T : any
 ---@param cond any
 ---@param true_expr T
