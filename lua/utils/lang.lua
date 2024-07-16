@@ -37,11 +37,13 @@ end
 -- If else expression
 --
 ---@generic T : any
----@param cond boolean
+---@param cond any
 ---@param true_expr T
 ---@param false_expr? T
 ---@return T
 M.if_else = function(cond, true_expr, false_expr)
+  if type(cond) ~= "boolean" then cond = cond ~= nil end
+
   if cond then
     return true_expr
   else
