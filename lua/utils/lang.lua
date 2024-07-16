@@ -42,9 +42,7 @@ end
 ---@param false_expr? T
 ---@return T
 M.if_else = function(cond, true_expr, false_expr)
-  if type(cond) ~= "boolean" then cond = cond ~= nil end
-
-  if cond then
+  if cond ~= nil or cond ~= false then
     return true_expr
   else
     return false_expr
