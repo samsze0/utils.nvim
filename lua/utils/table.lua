@@ -419,4 +419,12 @@ M.non_nil = function(tbl)
   return M.filter(tbl, function(_, v) return v ~= nil end)
 end
 
+-- Filter out nil or false values from a table
+--
+---@generic T : table
+---@return T
+M.non_falsey = function(tbl)
+  return M.filter(tbl, function(_, v) return v ~= nil and v ~= false end)
+end
+
 return M
