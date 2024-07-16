@@ -411,4 +411,12 @@ M.tbl_deep_extend = function(opts, ...)
   return result
 end
 
+-- Filter out nil values from a table
+--
+---@generic T : table
+---@return T
+M.non_nil = function(tbl)
+  return M.filter(tbl, function(_, v) return v ~= nil end)
+end
+
 return M
