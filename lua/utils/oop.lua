@@ -8,7 +8,7 @@ M.new_class = function(BaseClass)
   local NewClass = {}
   NewClass.__index = NewClass
   NewClass.__is_class = true
-  setmetatable(NewClass, { __index = BaseClass ~= nil and BaseClass or NewClass })
+  setmetatable(NewClass, { __index = BaseClass ~= nil and BaseClass or nil })
 
   return NewClass
 end
