@@ -381,9 +381,9 @@ local function _tbl_deep_extend(target, source, mode)
   for k, v in pairs(source) do
     if type(v) ~= "table" then
       _tbl_extend(target, k, v, mode)
-    elseif getmetatable(v) ~= nil then -- If table is a class instance
+    elseif getmetatable(v) ~= nil then
       _tbl_extend(target, k, v, mode)
-    elseif v["__is_class"] == true or v["__is_module"] == true then
+    elseif v["__is_module"] == true then
       _tbl_extend(target, k, v, mode)
     elseif M.is_array(v) then
       _tbl_extend(target, k, v, mode)
@@ -395,7 +395,6 @@ local function _tbl_deep_extend(target, source, mode)
 end
 
 -- Same as `vim.tbl_deep_extend` but does not mutate the input args
--- Careful with classes as they will be treated as regular tables, unless `__is_class` is `true`
 --
 ---@alias TblDeepExtendOpts { mode: "force" | "keep" | "error" }
 ---@param opts TblDeepExtendOpts
