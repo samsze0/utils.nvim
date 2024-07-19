@@ -8,7 +8,7 @@ local M = {}
 -- Return the shell command for retrieving the list of Git-aware files
 --
 ---@param git_dir string
----@return string cmd
+---@return string cmd Command for retrieving git paths
 M.files_cmd = function(git_dir)
   -- TODO: support for filtering out git submodules / unreadable files
   -- Option 1: `--exclude-from`
