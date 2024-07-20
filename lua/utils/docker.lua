@@ -1,5 +1,7 @@
 local opts_utils = require("utils.opts")
 local terminal_utils = require("utils.terminal")
+local dbg = require("utils").debug
+local tbl_utils = require("utils.table")
 
 local M = {}
 
@@ -51,12 +53,15 @@ function M.images(opts)
     ["--format"] = "json",
   }
 
-  local result = terminal_utils.system_unsafe(
+  local result = terminal_utils.systemlist_unsafe(
     "docker image ls " .. terminal_utils.shell_opts_tostring(args),
-    { trim_endline = true }
+    { trim_endline = true, trim = true, keepempty = false }
   )
-  result = vim.trim(result)
-  local images = vim.json.decode(result)
+  if #result == 0 then return {} end
+  local images = tbl_utils.map(
+    result,
+    function(i, e) return vim.json.decode(e) end
+  )
   ---@cast images DockerImage[]
 
   return images
@@ -81,12 +86,15 @@ function M.containers(opts)
     ["--format"] = "json",
   }
 
-  local result = terminal_utils.system_unsafe(
+  local result = terminal_utils.systemlist_unsafe(
     "docker container ls " .. terminal_utils.shell_opts_tostring(args),
-    { trim_endline = true }
+    { trim_endline = true, keepempty = false, trim = true }
   )
-  result = vim.trim(result)
-  local containers = vim.json.decode(result)
+  if #result == 0 then return {} end
+  local containers = tbl_utils.map(
+    result,
+    function(i, e) return vim.json.decode(e) end
+  )
   ---@cast containers DockerContainer[]
 
   return containers
