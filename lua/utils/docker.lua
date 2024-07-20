@@ -33,6 +33,9 @@ local M = {}
 ---@field Size string
 ---@field Controller string
 ---@field Status string
+---@field State string
+
+-- On ApiVersion 1.45
 
 -- Get docker images
 --
