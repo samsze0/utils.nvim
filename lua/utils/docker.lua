@@ -1,10 +1,36 @@
-local utils = require("utils")
+local opts_utils = require("utils.opts")
+local terminal_utils = require("utils.terminal")
 
 local M = {}
 
----@alias DockerImage { Containers: string, CreatedAt: string, CreatedSince: string, Digest: string, ID: string, Repository: string, SharedSize: string, Size: string, Tag: string, UniqueSize: string, VirtualSize: string }
+---@class DockerImage
+---@field Containers string
+---@field CreatedAt string
+---@field CreatedSince string
+---@field Digest string
+---@field ID string
+---@field Repository string
+---@field SharedSize string
+---@field Size string
+---@field Tag string
+---@field UniqueSize string
+---@field VirtualSize string
 
----@alias DockerContainer { Command: string, CreatedAt: string, ID: string, Image: string, Labels: string, LocalVolumes: string, Mounts: string, Names: string, Networks: string, Ports: string, RunningFor: string, Size: string, Controller: string, Status: string }
+---@class DockerContainer
+---@field Command string
+---@field CreatedAt string
+---@field ID string
+---@field Image string
+---@field Labels string
+---@field LocalVolumes string
+---@field Mounts string
+---@field Names string
+---@field Networks string
+---@field Ports string
+---@field RunningFor string
+---@field Size string
+---@field Controller string
+---@field Status string
 
 -- Get docker images
 --
@@ -16,17 +42,19 @@ function M.images(opts)
     error("Docker executable not found")
   end
 
-  opts = utils.opts_extend({
+  opts = opts_utils.extend({
     all = false,
   }, opts)
 
-  local opts = {
+  local args = {
     ["-a"] = opts.all,
     ["--format"] = "json",
   }
 
-  local result =
-    utils.system("docker image ls " .. utils.shell_opts_tostring(opts))
+  local result = terminal_utils.system_unsafe(
+    "docker image ls " .. terminal_utils.shell_opts_tostring(args),
+    { trim_endline = true }
+  )
   result = vim.trim(result)
   local images = vim.json.decode(result)
   ---@cast images DockerImage[]
@@ -44,17 +72,19 @@ function M.containers(opts)
     error("Docker executable not found")
   end
 
-  opts = utils.opts_extend({
+  opts = opts_utils.extend({
     all = false,
   }, opts)
 
-  local opts = {
+  local args = {
     ["-a"] = opts.all,
     ["--format"] = "json",
   }
 
-  local result =
-    utils.system("docker container ls " .. utils.shell_opts_tostring(opts))
+  local result = terminal_utils.system_unsafe(
+    "docker container ls " .. terminal_utils.shell_opts_tostring(args),
+    { trim_endline = true }
+  )
   result = vim.trim(result)
   local containers = vim.json.decode(result)
   ---@cast containers DockerContainer[]
