@@ -39,8 +39,8 @@ local M = {}
 
 -- Get docker images
 --
----@alias GetDodckerImagesOptions { all?: boolean }
----@param opts? GetDodckerImagesOptions
+---@alias GetDockerImagesOptions { all?: boolean }
+---@param opts? GetDockerImagesOptions
 ---@return DockerImage[]
 function M.images(opts)
   if vim.fn.executable("docker") ~= 1 then
@@ -72,8 +72,8 @@ end
 
 -- Get docker containers
 --
----@alias GetDodckerContainersOptions { all?: boolean }
----@param opts? GetDodckerContainersOptions
+---@alias GetDockerContainersOptions { all?: boolean }
+---@param opts? GetDockerContainersOptions
 ---@return DockerContainer[]
 function M.containers(opts)
   if vim.fn.executable("docker") ~= 1 then

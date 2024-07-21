@@ -491,7 +491,7 @@ M.list_status = function(opts)
     -- Cater "rename" i.e. xxx -> xxx
     -- TODO: check if git path contains " -> "
     if gitpath:find(" -> ") then
-      local parts = str_utils.split(gitpath, " -> ")
+      local parts = str_utils.split(gitpath, { sep = " -> " })
       gitpath = parts[2]
       filepath = opts.git_dir .. "/" .. gitpath
     end
