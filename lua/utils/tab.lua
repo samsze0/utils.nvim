@@ -1,4 +1,4 @@
-local utils = require("utils")
+local tbl_utils = require("utils.table")
 
 local M = {}
 
@@ -10,7 +10,7 @@ function M.get_tab_info(tab_nr) return vim.fn.gettabinfo(tab_nr or 0) end
 
 ---@return VimTab[]
 function M.get_tabs_info()
-  return utils.map(vim.fn.gettabinfo(), function(_, tab) return tab end)
+  return tbl_utils.map(vim.fn.gettabinfo(), function(_, tab) return tab end)
 end
 
 return M

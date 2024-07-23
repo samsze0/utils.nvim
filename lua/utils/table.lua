@@ -426,4 +426,13 @@ M.non_falsey = function(tbl)
   return M.filter(tbl, function(_, v) return v ~= nil and v ~= false end)
 end
 
+-- Filter out nil or empty string values from a table
+--
+---@generic T : table<any, string> | string[]
+---@param tbl T
+---@return T
+M.non_empty = function(tbl)
+  return M.filter(tbl, function(_, v) return v ~= nil and v ~= "" end)
+end
+
 return M
