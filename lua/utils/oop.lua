@@ -8,7 +8,7 @@ M.new_class = function(BaseClass)
   local NewClass = {}
   NewClass.__index = NewClass
   NewClass.__is_class = true
-  setmetatable(NewClass, { __index = BaseClass ~= nil and BaseClass or nil })
+  setmetatable(NewClass, { __index = BaseClass })
 
   return NewClass
 end
@@ -24,15 +24,22 @@ end
 M.is_instance = function(o, class, opts)
   opts = opts or {}
 
-  if type(o) ~= "table" or not o.__is_class then return false end
+  error("Not implemented")
+
+  if
+    type(o) ~= "table"
+    or type(class) ~= "table"
+    or not o.__is_class
+    or not class.__is_class
+  then
+    return false
+  end
 
   if opts.is_parent then return getmetatable(o) == class end
 
   while o do
-    if o == class then return true end
-
+    if getmetatable(o) == class then return true end
     o = getmetatable(o)
-    if o == o then break end -- Prevent infinite loop
   end
 
   return false
