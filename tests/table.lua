@@ -218,3 +218,9 @@ T.assert_deep_eq(tbl_utils.tbl_deep_extend({
 T.assert_deep_eq(tbl_utils.tbl_deep_extend({
   mode = "force"
 }, { [1] = { a = 1 }, [2] = { b = 2 } }, { [1] = { a = 3 } }), { [1] = { a = 3 }, [2] = { b = 2 } })
+
+T.assert_deep_eq(tbl_utils.non_empty({ "a", "", "b", "", "c" }), { "a", "b", "c" })
+T.assert_deep_eq(tbl_utils.non_empty({ a = "a", b = "", c = "c" }), { a = "a", c = "c" })
+
+T.assert_deep_eq(tbl_utils.non_false({ "a", false, "b", false, "c" }), { "a", "b", "c" })
+T.assert_deep_eq(tbl_utils.non_false({ a = "a", b = false, c = "c" }), { a = "a", c = "c" })

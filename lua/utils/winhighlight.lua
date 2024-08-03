@@ -22,10 +22,13 @@ end
 ---@param highlights WinHighlights
 ---@return string
 M.to_str = function(highlights)
-  return table.concat(tbl_utils.reduce(highlights, function(acc, k, v)
-    table.insert(acc, ("%s:%s"):format(k, v))
-    return acc
-  end, {}), ",")
+  return table.concat(
+    tbl_utils.reduce(highlights, function(acc, k, v)
+      table.insert(acc, ("%s:%s"):format(k, v))
+      return acc
+    end, {}),
+    ","
+  )
 end
 
 return M

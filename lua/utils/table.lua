@@ -410,29 +410,21 @@ M.tbl_deep_extend = function(opts, ...)
   return result
 end
 
--- Filter out nil values from a table
+-- Filter out false values from a table
 --
 ---@generic T : table
 ---@return T
-M.non_nil = function(tbl)
-  return M.filter(tbl, function(_, v) return v ~= nil end)
+M.non_false = function(tbl)
+  return M.filter(tbl, function(_, v) return v ~= false end)
 end
 
--- Filter out nil or false values from a table
---
----@generic T : table
----@return T
-M.non_falsey = function(tbl)
-  return M.filter(tbl, function(_, v) return v ~= nil and v ~= false end)
-end
-
--- Filter out nil or empty string values from a table
+-- Filter out empty string values from a table
 --
 ---@generic T : table<any, string> | string[]
 ---@param tbl T
 ---@return T
 M.non_empty = function(tbl)
-  return M.filter(tbl, function(_, v) return v ~= nil and v ~= "" end)
+  return M.filter(tbl, function(_, v) return v ~= "" end)
 end
 
 return M
