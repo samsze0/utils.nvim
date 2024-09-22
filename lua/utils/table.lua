@@ -28,6 +28,18 @@ M.map = function(tbl, func, opts)
   return new_tbl
 end
 
+---@param tbl table<any, any>
+---@return number
+M.len = function(tbl)
+  local count = 0
+  local _ = next(tbl)
+  while _ do
+    count = count + 1
+    _ = next(tbl, _)
+  end
+  return count
+end
+
 ---@generic T : any
 ---@param tbl table<any, T>
 ---@return T[]
